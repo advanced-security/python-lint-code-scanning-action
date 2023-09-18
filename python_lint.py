@@ -186,7 +186,7 @@ def pylint_format_sarif(results: List[Dict[str, Any]], target: Path) -> dict:
         start_line = int(result["line"])
         start_column = int(result["column"]) + 1
         end_line = int(result["endLine"]) if result["endLine"] is not None else int(result["line"])
-        end_column = int(result["endColumn"]) if result["endColumn"] is not None else int(result["column"]) + 1
+        end_column = int(result["endColumn"]) + 1 if result["endColumn"] is not None else int(result["column"]) + 1
 
         # append result to SARIF
         sarif_result = {
