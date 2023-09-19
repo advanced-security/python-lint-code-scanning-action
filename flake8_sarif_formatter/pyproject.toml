@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "flake8_sarif_formatter"
-version = "0.0.1"
+version = "0.0.2"
 description = "A SARIF formatter for flake8"
 readme = "README.md"
 requires-python = ">=3.6"
@@ -18,7 +18,11 @@ classifiers = [
     "Topic :: Software Development :: Libraries :: Python Modules",
     "Topic :: Software Development :: Quality Assurance",
 ]
-
+dependencies = [
+    "flake8>=6.1.0",
+    "requests==2.31.0",
+    "beautifulsoup4==4.12.2",
+]
 [project.urls]
 "Homepage" = "https://github.com/advanced-security/python-lint-code-scanning-action"
 "Bug Tracker" = "https://github.com/advanced-security/python-lint-code-scanning-action/issues"
