@@ -362,9 +362,7 @@ def mypy_linter(target: Path) -> Optional[dict]:
 
 def pyright_format_sarif(results: dict, target: Path) -> dict:
     """Convert Pyright output into SARIF."""
-    pyright_version = results["version"]
-
-    sarif_run = make_sarif_run(f"Pyright {pyright_version}")
+    sarif_run = make_sarif_run("Pyright")
 
     for diagnostic in results["generalDiagnostics"]:
         filename = diagnostic["file"]
