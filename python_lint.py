@@ -633,7 +633,7 @@ def main() -> None:
     for linter in args.linter:
         LOG.debug("Running %s", linter)
 
-        sarif_run = LINTERS[linter](Path(args.target).absolute())
+        sarif_run = LINTERS[linter](Path(args.target).resolve().absolute())
 
         if sarif_run is not None and len(sarif_run["results"]) > 0:
             sarif_runs.append(sarif_run)
