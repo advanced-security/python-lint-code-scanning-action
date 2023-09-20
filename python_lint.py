@@ -300,7 +300,8 @@ def mypy_format_sarif(mypy_results: str, target: Path) -> dict:
             rule_text = REMOVE_QUOTATIONS.sub('"..."', rule_text)
             rule_text = REMOVE_NUMBERS.sub("N", rule_text)
         else:
-            rule_text, rule_id = "MyPy built-in", "mypy/builtin"
+            LOG.debug("Skipping line, no MyPy rule id found: %s", result)
+            continue
 
         sarif_level = MYPY_TO_SARIF_LEVELS.get(level, "note")
 
