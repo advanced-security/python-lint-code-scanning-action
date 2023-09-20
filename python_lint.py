@@ -22,6 +22,12 @@ import re
 
 LOG = logging.getLogger(__name__)
 
+
+REMOVE_QUOTATIONS = re.compile(r'"[^"]*"')
+REMOVE_NUMBERS = re.compile(r"\d+")
+MYPY_TO_SARIF_LEVELS = {"error": "error", "warning": "warning", "note": "note"}
+
+
 # pytype is only supported on Python 3.10 and below, at the time of writing
 # the rest of the script is Python 3.7+
 if sys.version_info[0] == 2 or (sys.version_info[0] == 3 and sys.version_info[1] < 7):
@@ -175,6 +181,13 @@ def ruff_linter(target: Path) -> Optional[dict]:
     return sarif_run
 
 
+def make_description(message: str) -> str:
+    """Format 'message-id-form' into 'Message id form'."""
+    message = message.replace("-", " ")
+    message = message.capitalize()
+    return message
+
+
 def pylint_format_sarif(results: List[Dict[str, Any]], target: Path) -> dict:
     """Convert Pylint output into SARIF."""
     sarif_run = make_sarif_run("Pylint")
@@ -182,6 +195,7 @@ def pylint_format_sarif(results: List[Dict[str, Any]], target: Path) -> dict:
     for result in results:
         rule_id = f'pylint/{result["message-id"]}'
         message = result["message"]
+        description = make_description(result["symbol"])
         filename = target.joinpath(str(result["path"])).resolve().absolute().relative_to(target).as_posix()
         start_line = int(result["line"])
         start_column = int(result["column"]) + 1
@@ -221,7 +235,7 @@ def pylint_format_sarif(results: List[Dict[str, Any]], target: Path) -> dict:
             sarif_rule = {
                 "id": rule_id,
                 "shortDescription": {
-                    "text": result["symbol"],
+                    "text": description,
                 },
             }
             rules.append(sarif_rule)
@@ -256,11 +270,6 @@ def pylint_linter(target: Path) -> Optional[dict]:
     sarif_run = pylint_format_sarif(results, target)
 
     return sarif_run
-
-
-REMOVE_QUOTATIONS = re.compile(r'"[^"]*"')
-REMOVE_NUMBERS = re.compile(r"\d+")
-MYPY_TO_SARIF_LEVELS = {"error": "error", "warning": "warning", "note": "note"}
 
 
 def mypy_format_sarif(mypy_results: str, target: Path) -> dict:
@@ -594,6 +603,16 @@ def fixit_linter(target: Path) -> Optional[dict]:
     return sarif_run
 
 
+def make_paths_relative_to_target(runs: List[dict], target: Path) -> None:
+    """Make all paths relative to the target."""
+    for run in runs:
+        for result in run["results"]:
+            for location in result["locations"]:
+                uri = Path(location["physicalLocation"]["artifactLocation"]["uri"])
+                if uri.is_absolute():
+                    location["physicalLocation"]["artifactLocation"]["uri"] = uri.resolve().relative_to(target).as_posix()
+
+
 LINTERS = {
     "pylint": pylint_linter,
     "ruff": ruff_linter,
@@ -643,6 +662,8 @@ def main() -> None:
     if len(sarif_runs) == 0:
         LOG.info("No SARIF runs with results to output")
         sys.exit(0)
+
+    make_paths_relative_to_target(sarif_runs, target)
 
     sarif = {
         "$schema": "https://raw.githubusercontent.com/oasis-tcs/sarif-spec/master/Schemata/sarif-schema-2.1.0.json",
