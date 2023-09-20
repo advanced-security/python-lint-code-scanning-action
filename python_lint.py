@@ -610,7 +610,9 @@ def make_paths_relative_to_target(runs: List[dict], target: Path) -> None:
             for location in result["locations"]:
                 uri = Path(location["physicalLocation"]["artifactLocation"]["uri"])
                 if uri.is_absolute():
-                    location["physicalLocation"]["artifactLocation"]["uri"] = uri.resolve().relative_to(target).as_posix()
+                    location["physicalLocation"]["artifactLocation"]["uri"] = (
+                        uri.resolve().relative_to(target).as_posix()
+                    )
 
 
 LINTERS = {

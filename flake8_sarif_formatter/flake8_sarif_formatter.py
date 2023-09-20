@@ -21,7 +21,7 @@ class SarifFormatter(base.BaseFormatter):
 
     def get_flake8_rules(self):
         """Get the Flake8 rules.
-        
+
         Download from https://www.flake8rules.com/api/rules.json,
         or get from ./data/rules.json if that doesn't work.
         """
@@ -38,9 +38,7 @@ class SarifFormatter(base.BaseFormatter):
         for rule in rules:
             if "content" in rule:
                 # HTML to plain text
-                rule["content"] = "".join(
-                    BeautifulSoup(rule["content"], features="html.parser").findAll(text=True)
-                )
+                rule["content"] = "".join(BeautifulSoup(rule["content"], features="html.parser").findAll(text=True))
             rules_dict[rule["code"]] = rule
 
         return rules_dict
@@ -92,8 +90,12 @@ class SarifFormatter(base.BaseFormatter):
         self.sarif_results.append(sarif_result)
 
         if rule_id not in [rule["id"] for rule in self.sarif_rules]:
-            short_description = self.rules[error.code].get("message", error.code) if error.code in self.rules else error.code
-            long_description = self.rules[error.code].get("content", error.code) if error.code in self.rules else error.code
+            short_description = (
+                self.rules[error.code].get("message", error.code) if error.code in self.rules else error.code
+            )
+            long_description = (
+                self.rules[error.code].get("content", error.code) if error.code in self.rules else error.code
+            )
 
             sarif_rule = {
                 "id": rule_id,
