@@ -9,6 +9,30 @@ from flake8.style_guide import Violation
 import requests
 from bs4 import BeautifulSoup
 
+def get_flake8_rules():
+    """Get the Flake8 rules.
+
+    Download from https://www.flake8rules.com/api/rules.json,
+    or get from ./data/rules.json if that doesn't work.
+    """
+    rules: List[Dict[str, str]] = []
+
+    try:
+        rules = requests.get("https://www.flake8rules.com/api/rules.json").json()
+    except Exception:
+        with open(Path(__file__).parent / "data/rules.json", "r", encoding="utf-8") as f:
+            rules = json.load(f)
+
+    rules_dict: Dict[str, Dict[str, str]] = {}
+
+    for rule in rules:
+        if "content" in rule:
+            # HTML to plain text
+            rule["content"] = "".join(BeautifulSoup(rule["content"], features="html.parser").findAll(text=True))
+        rules_dict[rule["code"]] = rule
+
+    return rules_dict
+
 
 class SarifFormatter(base.BaseFormatter):
     """SARIF formatter for Flake8."""
@@ -17,31 +41,7 @@ class SarifFormatter(base.BaseFormatter):
         """Initialize the SARIF."""
         self.sarif_results = []
         self.sarif_rules = []
-        self.rules = self.get_flake8_rules()
-
-    def get_flake8_rules(self):
-        """Get the Flake8 rules.
-
-        Download from https://www.flake8rules.com/api/rules.json,
-        or get from ./data/rules.json if that doesn't work.
-        """
-        rules: List[Dict[str, str]] = []
-
-        try:
-            rules = requests.get("https://www.flake8rules.com/api/rules.json").json()
-        except Exception:
-            with open(Path(__file__).parent / "data/rules.json", "r", encoding="utf-8") as f:
-                rules = json.load(f)
-
-        rules_dict: Dict[str, Dict[str, str]] = {}
-
-        for rule in rules:
-            if "content" in rule:
-                # HTML to plain text
-                rule["content"] = "".join(BeautifulSoup(rule["content"], features="html.parser").findAll(text=True))
-            rules_dict[rule["code"]] = rule
-
-        return rules_dict
+        self.rules = get_flake8_rules()
 
     def stop(self):
         """Output the SARIF."""

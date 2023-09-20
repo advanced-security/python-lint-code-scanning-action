@@ -26,7 +26,10 @@ LOG = logging.getLogger(__name__)
 REMOVE_QUOTATIONS = re.compile(r'"[^"]*"')
 REMOVE_NUMBERS = re.compile(r"\d+")
 MYPY_TO_SARIF_LEVELS = {"error": "error", "warning": "warning", "note": "note"}
-
+REMOVE_REPORT_PREIX = re.compile(r"^report")
+FIND_CAMEL_CASE = re.compile("[A-Z][^A-Z]+")
+REMOVE_TRAILING_SQUARE_BRACKETS = re.compile(r"\s*\[[^\]]+\]\s*$")
+REMOVE_HINT = re.compile(r"\s*\(hint: [^)]+\)\s*$")
 
 # pytype is only supported on Python 3.10 and below, at the time of writing
 # the rest of the script is Python 3.7+
@@ -86,8 +89,13 @@ def ruff_format_sarif(results: List[Dict[str, Any]], target: Path) -> dict:
     """Convert Ruff output into SARIF."""
     sarif_run = make_sarif_run("Ruff")
 
+    from flake8_sarif_formatter import get_flake8_rules
+
+    flake8_rules = get_flake8_rules()
+
     for result in results:
-        rule_id = f'ruff/{result["code"]}'
+        code = result["code"]
+        rule_id = f'ruff/{code}'
         filename = result["filename"]
         message = result["message"]
 
@@ -130,12 +138,23 @@ def ruff_format_sarif(results: List[Dict[str, Any]], target: Path) -> dict:
         rules = sarif_run["tool"]["driver"]["rules"]
 
         if rule_id not in [rule["id"] for rule in rules]:
+            short_description = (
+                flake8_rules[code].get("message", code) if error.code in flake8_rules else code
+            )
+            long_description = (
+                flake8_rules[code].get("content", code) if error.code in flake8_rules else code
+            )
+
             sarif_rule = {
                 "id": rule_id,
                 "shortDescription": {
-                    "text": rule_id,
+                    "text": short_description,
+                },
+                "longDescription": {
+                    "content": long_description,
                 },
             }
+
             rules.append(sarif_rule)
 
     return sarif_run
@@ -181,7 +200,7 @@ def ruff_linter(target: Path) -> Optional[dict]:
     return sarif_run
 
 
-def make_description(message: str) -> str:
+def make_pylint_description(message: str) -> str:
     """Format 'message-id-form' into 'Message id form'."""
     message = message.replace("-", " ")
     message = message.capitalize()
@@ -195,7 +214,7 @@ def pylint_format_sarif(results: List[Dict[str, Any]], target: Path) -> dict:
     for result in results:
         rule_id = f'pylint/{result["message-id"]}'
         message = result["message"]
-        description = make_description(result["symbol"])
+        description = make_pylint_description(result["symbol"])
         filename = target.joinpath(str(result["path"])).resolve().absolute().relative_to(target).as_posix()
         start_line = int(result["line"])
         start_column = int(result["column"]) + 1
@@ -299,6 +318,8 @@ def mypy_format_sarif(mypy_results: str, target: Path) -> dict:
 
             rule_text = REMOVE_QUOTATIONS.sub('"..."', rule_text)
             rule_text = REMOVE_NUMBERS.sub("N", rule_text)
+            rule_text = REMOVE_TRAILING_SQUARE_BRACKETS.sub("", rule_text)
+            rule_text = REMOVE_HINT.sub("", rule_text)
         else:
             LOG.debug("Skipping line, no MyPy rule id found: %s", result)
             continue
@@ -347,6 +368,8 @@ def mypy_format_sarif(mypy_results: str, target: Path) -> dict:
 def mypy_linter(target: Path) -> Optional[dict]:
     """Run the mypy linter."""
     mypy_args = [
+        "--install-types",
+        "--non-interactive",
         "--ignore-missing-imports",
         "--no-error-summary",
         "--no-pretty",
@@ -356,18 +379,26 @@ def mypy_linter(target: Path) -> Optional[dict]:
         "--show-absolute-path",
     ]
 
-    process = run(["mypy", *mypy_args, target.absolute().as_posix()], capture_output=True, check=False)
+    process_lint = run(["mypy", *mypy_args, target.absolute().as_posix()], capture_output=True, check=False)
 
-    if process.stderr:
-        LOG.error("STDERR: %s", process.stderr.decode("utf-8"))
-        return None
+    # if process_lint.stderr:
+    #     LOG.error("STDERR: %s", process_lint.stderr.decode("utf-8"))
+    #     return None
 
-    if not process.stdout:
-        return None
+    # if not process_lint.stdout:
+    #     return None
 
-    sarif_run = mypy_format_sarif(process.stdout.decode("utf-8"), target)
+    sarif_run = mypy_format_sarif(process_lint.stderr.decode("utf-8"), target)
 
     return sarif_run
+
+
+def make_pyright_description(rule: str) -> str:
+    """Format 'reportSomeRuleDescription' into 'Some rule description'."""
+    rule = REMOVE_REPORT_PREIX.sub("", rule)
+    rule = FIND_CAMEL_CASE.sub(lambda x: x.group(0).lower() + " ", rule)
+
+    return rule
 
 
 def pyright_format_sarif(results: dict, target: Path) -> dict:
@@ -498,7 +529,7 @@ def pytype_format_sarif(results: str, target: Path) -> dict:
                 sarif_rule = {
                     "id": rule_id,
                     "shortDescription": {
-                        "text": rule_id,
+                        "text": make_pylint_description(rule),
                     },
                 }
                 rules.append(sarif_rule)
@@ -526,6 +557,12 @@ def pytype_linter(target: Path) -> Optional[dict]:
     sarif_run = pytype_format_sarif(results, target)
 
     return sarif_run
+
+
+def make_fixit_description(rule: str) -> str:
+    """Format 'SomeRuleDescription' into 'Some rule description'."""
+    rule = FIND_CAMEL_CASE.sub(lambda x: x.group(0).lower() + " ", rule)
+    return rule
 
 
 def fixit_format_sarif(results: str, target: Path) -> dict:
