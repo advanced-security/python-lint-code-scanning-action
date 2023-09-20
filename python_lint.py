@@ -630,10 +630,12 @@ def main() -> None:
 
     sarif_runs: List[dict] = []
 
+    target = Path(args.target).resolve().absolute()
+
     for linter in args.linter:
         LOG.debug("Running %s", linter)
 
-        sarif_run = LINTERS[linter](Path(args.target).resolve().absolute())
+        sarif_run = LINTERS[linter](target)
 
         if sarif_run is not None and len(sarif_run["results"]) > 0:
             sarif_runs.append(sarif_run)
