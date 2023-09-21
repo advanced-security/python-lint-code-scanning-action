@@ -34,7 +34,7 @@ def get_flake8_rules():
 
     if "E501" in rules_dict and "message" in rules_dict["E501"]:
         # E501 default has a specific error message, so we'll fix that
-        if rules_dict["message"] == "Line too long (82 > 79 characters)":
+        if rules_dict["E501"]["message"] == "Line too long (82 > 79 characters)":
             rules_dict["E501"]["message"] = "Line too long"
 
     return rules_dict
