@@ -36,13 +36,14 @@ runs:
           PYTHON_CMD=python3
         fi
         linters=('ruff' 'flake8' 'pylint' 'mypy' 'pyright' 'pytype' 'fixit')
+        install_flake8_formatter_linters=('ruff', 'flake8')
         if [[ "${linters[*]}" =~ (^|[^[:alpha:]])${INPUTS_LINTER}([^[:alpha:]]|$) ]]; then
           if [[ "${INPUTS_LINTER}" == "fixit" ]]; then
             "${PYTHON_CMD}" -mpip install "fixit >1" --pre || echo "::error::fixit 2 is not available for Python ${INPUTS_PYTHON_VERSION}"
           else
             "${PYTHON_CMD}" -mpip install "${INPUTS_LINTER}" || echo "::error::${INPUTS_LINTER} failed to install for Python ${INPUTS_PYTHON_VERSION}"
           fi
-          if [[ "${INPUTS_LINTER}" == "flake8" ]]; then
+          if [[ "${install_flake8_formatter_linters[*]}" =~ (^|[^[:alpha:]])${INPUTS_LINTER}([^[:alpha:]]|$) ]]; then
             "${PYTHON_CMD}" -mpip install "${GITHUB_ACTION_PATH}"/flake8_sarif_formatter
           fi
 
