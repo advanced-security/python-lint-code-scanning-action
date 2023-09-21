@@ -30,7 +30,7 @@ runs:
         python-version: ${{ inputs.python-version }}
     - name: Run Python Lint
       run: |
-        echo "::notice::Using python version ${INPUT_PYTHON_VERSION}"
+        echo "::notice::Using python version ${INPUTS_PYTHON_VERSION}"
         if [[ "${OSTYPE}" == "msys" ]]; then
           PYTHON_CMD=python
         else
