@@ -139,10 +139,10 @@ def ruff_format_sarif(results: List[Dict[str, Any]], target: Path) -> dict:
 
         if rule_id not in [rule["id"] for rule in rules]:
             short_description = (
-                flake8_rules[code].get("message", code) if error.code in flake8_rules else code
+                flake8_rules[code].get("message", code) if code in flake8_rules else code
             )
             long_description = (
-                flake8_rules[code].get("content", code) if error.code in flake8_rules else code
+                flake8_rules[code].get("content", code) if code in flake8_rules else code
             )
 
             sarif_rule = {
