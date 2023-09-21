@@ -141,7 +141,7 @@ def ruff_format_sarif(results: List[Dict[str, Any]], target: Path) -> dict:
             short_description = (
                 flake8_rules[code].get("message", code) if code in flake8_rules else code
             )
-            
+
             # TODO: when Code Scanning supports it, add "content" as longDescription
 
             sarif_rule = {
@@ -405,6 +405,7 @@ def make_pyright_description(rule: str) -> str:
     """Format 'reportSomeRuleDescription' into 'Some rule description'."""
     rule = REMOVE_REPORT_PREIX.sub("", rule)
     rule = FIND_CAMEL_CASE.sub(lambda x: x.group(0).lower() + " ", rule)
+    rule = rule.capitalize()
 
     return rule
 
@@ -571,6 +572,7 @@ def pytype_linter(target: Path) -> Optional[dict]:
 def make_fixit_description(rule: str) -> str:
     """Format 'SomeRuleDescription' into 'Some rule description'."""
     rule = FIND_CAMEL_CASE.sub(lambda x: x.group(0).lower() + " ", rule)
+    rule = rule.capitalize()
     return rule
 
 
