@@ -299,14 +299,26 @@ def mypy_format_sarif(mypy_results: str, target: Path) -> dict:
         if not result:
             continue
 
+        if ":" not in result:
+            LOG.debug("Skipping line, no location found: %s", result)
+            continue
+
         # NOTE: assumes no filename contains " :", may need to be addressed if that causes issues
         location, message = result.split(": ", 1)
 
         # NOTE: assumes we're using `--show-error-end`, which gives the end line/column too
-        filename, start_line, start_column, end_line, end_column, *_ = location.split(":") + [1, None, None]
+        try:
+            filename, start_line, start_column, end_line, end_column, *_ = location.split(":") + [1, None, None, None]
+        except ValueError as err:
+            LOG.error("Unable to parse location %s: %s", location, err)
+            continue
 
         if filename is None or start_line is None or start_column is None:
-            LOG.error("Unable to parse location: %s", location)
+            LOG.error("Unable to parse location, missing filename or start line/column: %s", location)
+            continue
+
+        if ": " not in message:
+            LOG.debug("Skipping line, no message found: %s", result)
             continue
 
         level, rule_msg = message.split(": ", 1)
