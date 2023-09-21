@@ -23,7 +23,7 @@ jobs:
           python3 -mpip install flake8 pylint ruff mypy pytype pyright fixit
           python3 -mpip install ./flake8_sarif_formatter
       - name: Run Python Lint
-        uses: aegilops/python-lint-code-scanning-action@3968092b779b5098a2e88d5c5cf8da4af10e3cb3
+        uses: aegilops/python-lint-code-scanning-action@243ffea0af133853cfc312e5b1c839afbd5dc81b
         with:
           linter: ${{ matrix.linter }}
           python-version: ${{ matrix.python-version }}
