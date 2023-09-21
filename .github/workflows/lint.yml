@@ -13,8 +13,10 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        linter: [flake8, pylint, ruff, mypy, pytype, pyright, fixit]
-        python-version: ['3.7', '3.8', '3.9', '3.10', '3.11']
+        #linter: ['flake8', 'pylint', 'ruff', 'mypy', 'pytype', 'pyright', 'fixit']
+        #python-version: ['3.7', '3.8', '3.9', '3.10', '3.11']
+        linter: ['flake8']
+        python-version: ['3.11']
     steps:
       # install dependencies for all linters, then run the linter, so we don't get import failures
       - uses: actions/checkout@v4

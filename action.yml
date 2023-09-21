@@ -44,7 +44,7 @@ runs:
             "${PYTHON_CMD}" -mpip install "${INPUTS_LINTER}" || echo "::error::${INPUTS_LINTER} failed to install for Python ${INPUTS_PYTHON_VERSION}"
           fi
           if [[ "${install_flake8_formatter_linters[*]}" =~ (^|[^[:alpha:]])${INPUTS_LINTER}([^[:alpha:]]|$) ]]; then
-            echo "::info::installing flake8_sarif_formatter for ${INPUTS_LINTER}"
+            echo "::note::installing flake8_sarif_formatter for ${INPUTS_LINTER}"
             "${PYTHON_CMD}" -mpip install "${GITHUB_ACTION_PATH}"/flake8_sarif_formatter
           fi
 
