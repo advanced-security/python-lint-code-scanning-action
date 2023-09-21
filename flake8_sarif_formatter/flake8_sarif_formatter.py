@@ -9,6 +9,7 @@ from flake8.style_guide import Violation
 import requests
 from bs4 import BeautifulSoup
 
+
 def get_flake8_rules():
     """Get the Flake8 rules.
 
