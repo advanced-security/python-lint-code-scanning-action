@@ -707,12 +707,12 @@ def main() -> None:
 
         sarif_run = LINTERS[linter](target)
 
-        if sarif_run is not None and len(sarif_run["results"]) > 0:
+        if sarif_run is not None:
             sarif_runs.append(sarif_run)
 
     if len(sarif_runs) == 0:
-        LOG.info("No SARIF runs with results to output")
-        sys.exit(0)
+        LOG.info("No SARIF runs to output")
+        sys.exit(1)
 
     make_paths_relative_to_target(sarif_runs, target)
 
