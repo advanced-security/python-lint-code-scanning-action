@@ -89,9 +89,8 @@ def ruff_format_sarif(results: List[Dict[str, Any]], target: Path) -> dict:
     """Convert Ruff output into SARIF."""
     sarif_run = make_sarif_run("Ruff")
 
-    from flake8_sarif_formatter import get_flake8_rules
-
-    flake8_rules = get_flake8_rules()
+    from flake8_sarif_formatter import flake8_sarif_formatter
+    flake8_rules = flake8_sarif_formatter.get_flake8_rules()
 
     for result in results:
         code = result["code"]
