@@ -417,6 +417,7 @@ def pyright_format_sarif(results: dict, target: Path) -> dict:
         filename = diagnostic["file"]
         message = diagnostic["message"]
         rule_id = f'pyright/{diagnostic["rule"]}' if "rule" in diagnostic else "pyright/builtIn"
+        description = make_pyright_description(diagnostic["rule"] if "rule" in diagnostic else "builtIn")
 
         start_line = diagnostic["range"]["start"]["line"] + 1
         start_column = diagnostic["range"]["start"]["character"] + 1
@@ -454,7 +455,7 @@ def pyright_format_sarif(results: dict, target: Path) -> dict:
             sarif_rule = {
                 "id": rule_id,
                 "shortDescription": {
-                    "text": rule_id,
+                    "text": description,
                 },
             }
             rules.append(sarif_rule)
@@ -587,6 +588,7 @@ def fixit_format_sarif(results: str, target: Path) -> dict:
             column = int(match.group("column"))
             message = match.group("message")
             rule = match.group("rule")
+            description = make_fixit_description(rule)
 
             rule_id = f"fixit/{rule}"
 
@@ -621,7 +623,7 @@ def fixit_format_sarif(results: str, target: Path) -> dict:
                 sarif_rule = {
                     "id": rule_id,
                     "shortDescription": {
-                        "text": rule_id,
+                        "text": description,
                     },
                 }
                 rules.append(sarif_rule)
