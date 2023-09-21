@@ -94,17 +94,13 @@ class SarifFormatter(base.BaseFormatter):
             short_description = (
                 self.rules[error.code].get("message", error.code) if error.code in self.rules else error.code
             )
-            long_description = (
-                self.rules[error.code].get("content", error.code) if error.code in self.rules else error.code
-            )
+
+            # TODO: when Code Scanning allows it, add "content" as longDescription
 
             sarif_rule = {
                 "id": rule_id,
                 "shortDescription": {
                     "text": short_description,
-                },
-                "longDescription": {
-                    "content": long_description,
                 },
             }
 

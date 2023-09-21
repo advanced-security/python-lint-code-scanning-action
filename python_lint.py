@@ -141,17 +141,13 @@ def ruff_format_sarif(results: List[Dict[str, Any]], target: Path) -> dict:
             short_description = (
                 flake8_rules[code].get("message", code) if code in flake8_rules else code
             )
-            long_description = (
-                flake8_rules[code].get("content", code) if code in flake8_rules else code
-            )
+            
+            # TODO: when Code Scanning supports it, add "content" as longDescription
 
             sarif_rule = {
                 "id": rule_id,
                 "shortDescription": {
                     "text": short_description,
-                },
-                "longDescription": {
-                    "content": long_description,
                 },
             }
 
