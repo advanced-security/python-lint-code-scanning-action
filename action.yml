@@ -46,7 +46,10 @@ runs:
           fi
           if [[ "${install_flake8_formatter_linters[*]}" =~ (^|[^[:alpha:]])${INPUTS_LINTER}([^[:alpha:]]|$) ]]; then
             echo "::notice::installing flake8_sarif_formatter for ${INPUTS_LINTER}"
-            "${PYTHON_CMD}" -mpip install "${GITHUB_ACTION_PATH}"/flake8_sarif_formatter
+            cd "${RUNNER_TEMP}"
+            git clone https://github.com/aegilops/flake8_sarif_formatter.git
+            cd flake8_sarif_formatter
+            "${PYTHON_CMD}" -mpip install .
           fi
 
           "${PYTHON_CMD}" "${GITHUB_ACTION_PATH}"/python_lint.py "${INPUTS_LINTER}" --target="${INPUTS_TARGET}" --output="${GITHUB_WORKSPACE}/${INPUTS_OUTPUT}" || echo "::error::${INPUTS_LINTER} failed to run for Python ${INPUTS_PYTHON_VERSION}"
