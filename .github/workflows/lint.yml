@@ -23,7 +23,7 @@ jobs:
       - name: Install pip dependencies
         run: |
           python3 -mpip install flake8 pylint ruff mypy pytype pyright fixit
-          python3 -mpip install https://github.com/aegilops/flake8_sarif_formatter.git
+          python3 -mpip install git+https://github.com/aegilops/flake8_sarif_formatter.git#egg=flake8_sarif_formatter
       - name: Run Python Lint
         uses: aegilops/python-lint-code-scanning-action@a1c703aa1acfa6fe0e241472817e7bc078772f66
         with:
