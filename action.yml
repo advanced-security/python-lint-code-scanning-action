@@ -36,6 +36,7 @@ runs:
         else
           PYTHON_CMD="python${INPUTS_PYTHON_VERSION}"
         fi
+        "${PYTHON_CMD}" -mpip install --upgrade pip
         linters=('ruff' 'flake8' 'pylint' 'mypy' 'pyright' 'pytype' 'fixit')
         install_flake8_formatter_linters=('ruff', 'flake8')
         if [[ "${linters[*]}" =~ (^|[^[:alpha:]])${INPUTS_LINTER}([^[:alpha:]]|$) ]]; then
