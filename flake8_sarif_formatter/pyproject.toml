@@ -28,4 +28,4 @@ dependencies = [
 "Bug Tracker" = "https://github.com/advanced-security/python-lint-code-scanning-action/issues"
 
 [project.entry-points."flake8.report"]
-sarif = "flake8_sarif_formatter.flake8_sarif_formatter:SarifFormatter"
+sarif = "flake8_sarif_formatter:SarifFormatter"
