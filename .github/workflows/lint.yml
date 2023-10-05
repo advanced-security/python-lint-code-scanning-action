@@ -18,12 +18,12 @@ jobs:
         linter: ['flake8']
         python-version: ['3.11']
     steps:
-      # install dependencies for all linters, then run the linter, so we don't get import failures
+      # install dependencies for all linters, then run the linter, so we don't get import failures whenthe linters scan the code
       - uses: actions/checkout@v4
       - name: Install pip dependencies
         run: |
           python3 -mpip install flake8 pylint ruff mypy pytype pyright fixit
-          python3 -mpip install ./flake8_sarif_formatter
+          python3 -mpip install https://github.com/aegilops/flake8_sarif_formatter.git
       - name: Run Python Lint
         uses: aegilops/python-lint-code-scanning-action@80ab36b3fb3eb28b4cae23900eac45d9059fc872
         with:
