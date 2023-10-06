@@ -1,10 +1,8 @@
 # Python Linting Action
 
-> ⚠️ this is work in progress ⚠️
->
-> 🚨 it does not use an open source license yet, and comes with no support guarantees at all - it is pre-release and still in alpha/testing 🚨
+> ℹ️ This is an _unofficial_ tool created by Field Security Services, and is not officially supported by GitHub.
 
-This Action and Python script lets you run one of several Python linters and type checkers, and upload the results to GitHub's Code Scanning.
+This Action and Python script lets you run one of several Python linters and type checkers, and upload the results to GitHub's Code Scanning, which is part of [Advanced Security](https://docs.github.com/en/get-started/learning-about-github/about-github-advanced-security) (free for open source projects hosted on GitHub).
 
 ## Supported linters
 
@@ -30,7 +28,7 @@ This Action and Python script lets you run one of several Python linters and typ
 First install the Flake8 SARIF formatter, if you are using Flake8:
 
 ```bash
-python3 -m pip install ./flake8_sarif_formatter
+python3 -m pip install flake8-sarif-formatter
 ```
 
 Then run the linter:
@@ -44,7 +42,7 @@ The linter/type checker can be one or more of `flake8`, `pylint`, `ruff`, `mypy`
 ### Action
 
 ```yaml
-use: aegilops/python-lint-code-scanning-action@v0.0.1
+use: advanced-security/python-lint-code-scanning-action@v1
 with:
   linter: flake8
 ```
@@ -59,7 +57,7 @@ jobs:
       matrix:
         linter: [flake8, pylint, ruff, mypy, pytype, pyright, fixit]
     steps:
-      - use: aegilops/python-lint-code-scanning-action@v0.0.1
+      - use: advanced-security/python-lint-code-scanning-action@v1
         with:
           linter: ${{ matrix.linter }}
 ```
@@ -75,7 +73,7 @@ jobs:
       matrix:
         python-version: [3.7, 3.8, 3.9, 3.10, 3.11]
     steps:
-      - use: aegilops/python-lint-code-scanning-action@v0.0.1
+      - use: advanced-security/python-lint-code-scanning-action@v1
         with:
           linter: flake8
           python-version: ${{ matrix.python-version }}
@@ -91,7 +89,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - run: python3 -mpip install flake8-bugbear
-      - use: aegilops/python-lint-code-scanning-action@v0.0.1
+      - use: advanced-security/python-lint-code-scanning-action@v1
         with:
           linter: flake8
 ```
@@ -141,3 +139,21 @@ Actions lets you do a matrix job, which does great work in parallelising things.
 We could use Python multi-processing to run them all in parallel, but that doesn't make such sense on standard GitHub runners.
 
 If you want to run them all at once you can call the underlying script with multiple linters, but that feature is really just to make testing easier, since they run in series.
+
+## License
+
+This project is licensed under the terms of the MIT open source license. Please refer to the [LICENSE](LICENSE) for the full terms.
+
+## Maintainers
+
+See [CODEOWNERS](CODEOWNERS) for the list of maintainers.
+
+## Support
+
+> ℹ️ This is an _unofficial_ tool created by Field Security Services, and is not officially supported by GitHub.
+
+See the [SUPPORT](SUPPORT.md) file.
+
+## Background
+
+See the [CHANGELOG](CHANGELOG.md), [CONTRIBUTING](CONTRIBUTING.md), [SECURITY](SECURITY.md), [SUPPORT](SUPPORT.md), [CODE OF CONDUCT](CODE_OF_CONDUCT.md) and [PRIVACY](PRIVACY.md) files for more information.
