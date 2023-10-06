@@ -172,7 +172,7 @@ def ruff_linter(target: Path) -> Optional[dict]:
         ruff_exe = "ruff" if sys.platform != "win32" else "ruff.exe"
 
     # call ruff, capture STDOUT and STDERR using subprocess
-    process = run([ruff_exe, target, "--format", "json"], capture_output=True, check=False)
+    process = run([ruff_exe, target, "--output-format", "json"], capture_output=True, check=False)
 
     if process.stderr:
         LOG.error("STDERR: %s", process.stderr.decode("utf-8"))
