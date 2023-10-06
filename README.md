@@ -34,7 +34,7 @@ python3 -m pip install flake8-sarif-formatter
 Then run the linter:
 
 ```bash
-python3 ./python_lint <linter> [<linter> ...] [<options>]
+python3 ./python_lint.py <linter> [<linter> ...] [<options>]
 ```
 
 The linter/type checker can be one or more of `flake8`, `pylint`, `ruff`, `mypy`, `pytype`, `pyright`, `fixit`.
