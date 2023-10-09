@@ -18,7 +18,35 @@ inputs:
     description: 'The version of python to use'
     required: false
     default: '3.10'
-    choices: ['3.11', '3.10', '3.9', '3.8', '3.7']
+    choices: ['3.12', '3.11', '3.10', '3.9', '3.8', '3.7']
+  ruff-version:
+    description: 'The version of ruff to use'
+    required: false
+    default: 'latest'
+  flake8-version:
+    description: 'The version of flake8 to use'
+    required: false
+    default: 'latest'
+  pylint-version:
+    description: 'The version of pylint to use'
+    required: false
+    default: 'latest'
+  mypy-version:
+    description: 'The version of mypy to use'
+    required: false
+    default: 'latest'
+  pyright-version:
+    description: 'The version of pyright to use'
+    required: false
+    default: 'latest'
+  pytype-version:
+    description: 'The version of pytype to use'
+    required: false
+    default: 'latest'
+  fixit-version:
+    description: 'The version of fixit to use'
+    required: false
+    default: 'latest'
 runs:
   using: 'composite'
   steps:
@@ -39,12 +67,44 @@ runs:
         "${PYTHON_CMD}" -mpip install --upgrade pip
         linters=('ruff' 'flake8' 'pylint' 'mypy' 'pyright' 'pytype' 'fixit')
         install_flake8_formatter_linters=('ruff', 'flake8')
+        EXTRA_PIP_FLAGS=''
+        LINTER_VERSION_CONSTRAINT=''
         if [[ "${linters[*]}" =~ (^|[^[:alpha:]])${INPUTS_LINTER}([^[:alpha:]]|$) ]]; then
           if [[ "${INPUTS_LINTER}" == "fixit" ]]; then
-            "${PYTHON_CMD}" -mpip install "fixit >1" --pre || echo "::error::fixit 2 is not available for Python ${INPUTS_PYTHON_VERSION}"
+            if [[ "${INPUTS_FIXIT_VERSION}" == "latest" ]]; then
+              LINTER_VERSION_CONSTRAINT=' >1'
+            else
+              LINTER_VERSION_CONSTRAINT="==${INPUTS_FIXIT_VERSION}"
+            fi
+            EXTRA_PIP_FLAGS=" --pre"
           else
-            "${PYTHON_CMD}" -mpip install "${INPUTS_LINTER}" || ( echo "::error::${INPUTS_LINTER} failed to install for Python ${INPUTS_PYTHON_VERSION}" && exit 1 )
+            if [[ "${INPUTS_LINTER}" == "ruff" ]]; then
+              if [[ "${INPUTS_RUFF_VERSION}" != "latest" ]]; then
+                LINTER_VERSION_CONSTRAINT="==${INPUTS_RUFF_VERSION}"
+              fi
+            elif [[ "${INPUTS_LINTER}" == "flake8" ]]; then
+              if [[ "${INPUTS_FLAKE8_VERSION}" != "latest" ]]; then
+                LINTER_VERSION_CONSTRAINT="==${INPUTS_FLAKE8_VERSION}"
+              fi
+            elif [[ "${INPUTS_LINTER}" == "pylint" ]]; then
+              if [[ "${INPUTS_PYLINT_VERSION}" != "latest" ]]; then
+                LINTER_VERSION_CONSTRAINT="==${INPUTS_PYLINT_VERSION}"
+              fi
+            elif [[ "${INPUTS_LINTER}" == "mypy" ]]; then
+              if [[ "${INPUTS_MYPY_VERSION}" != "latest" ]]; then
+                LINTER_VERSION_CONSTRAINT="==${INPUTS_MYPY_VERSION}"
+              fi
+            elif [[ "${INPUTS_LINTER}" == "pyright" ]]; then
+              if [[ "${INPUTS_PYRIGHT_VERSION}" != "latest" ]]; then
+                LINTER_VERSION_CONSTRAINT="==${INPUTS_PYRIGHT_VERSION}"
+              fi
+            elif [[ "${INPUTS_LINTER}" == "pytype" ]]; then
+              if [[ "${INPUTS_PYTYPE_VERSION}" != "latest" ]]; then
+                LINTER_VERSION_CONSTRAINT="==${INPUTS_PYTYPE_VERSION}"
+              fi
+            fi
           fi
+          "${PYTHON_CMD}" -mpip install "${INPUTS_LINTER}${LINTER_VERSION_CONSTRAINT}" ${EXTRA_PIP_FLAGS} || ( echo "::error::${INPUTS_LINTER}${LINTER_VERSION_CONSTRAINT} failed to install for Python ${INPUTS_PYTHON_VERSION}" && exit 1 )
           if [[ "${install_flake8_formatter_linters[*]}" =~ (^|[^[:alpha:]])${INPUTS_LINTER}([^[:alpha:]]|$) ]]; then
             echo "::notice::installing flake8_sarif_formatter for ${INPUTS_LINTER}"
             "${PYTHON_CMD}" -mpip install 'git+https://github.com/aegilops/flake8_sarif_formatter.git#egg=flake8_sarif_formatter'
@@ -60,6 +120,13 @@ runs:
         INPUTS_TARGET: ${{ inputs.target }}
         INPUTS_OUTPUT: ${{ inputs.output }}
         INPUTS_PYTHON_VERSION: ${{ inputs.python-version }}
+        INPUTS_RUFF_VERSION: ${{ inputs.ruff-version }}
+        INPUTS_FLAKE8_VERSION: ${{ inputs.flake8-version }}
+        INPUTS_PYLINT_VERSION: ${{ inputs.pylint-version }}
+        INPUTS_MYPY_VERSION: ${{ inputs.mypy-version }}
+        INPUTS_PYRIGHT_VERSION: ${{ inputs.pyright-version }}
+        INPUTS_PYTYPE_VERSION: ${{ inputs.pytype-version }}
+        INPUTS_FIXIT_VERSION: ${{ inputs.fixit-version }}
       shell: bash
     - name: Upload SARIF
       if: ${{ hashFiles(inputs.output) != '' }}
