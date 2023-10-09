@@ -107,7 +107,7 @@ runs:
           "${PYTHON_CMD}" -mpip install "${INPUTS_LINTER}${LINTER_VERSION_CONSTRAINT}" ${EXTRA_PIP_FLAGS} || ( echo "::error::${INPUTS_LINTER}${LINTER_VERSION_CONSTRAINT} failed to install for Python ${INPUTS_PYTHON_VERSION}" && exit 1 )
           if [[ "${install_flake8_formatter_linters[*]}" =~ (^|[^[:alpha:]])${INPUTS_LINTER}([^[:alpha:]]|$) ]]; then
             echo "::notice::installing flake8_sarif_formatter for ${INPUTS_LINTER}"
-            "${PYTHON_CMD}" -mpip install 'git+https://github.com/aegilops/flake8_sarif_formatter.git#egg=flake8_sarif_formatter'
+            "${PYTHON_CMD}" -mpip install flake8-sarif-formatter || ( echo "::error::flake8-sarif-formatter failed to install for Python ${INPUTS_PYTHON_VERSION}" && exit 1 )
           fi
 
           "${PYTHON_CMD}" "${GITHUB_ACTION_PATH}"/python_lint.py "${INPUTS_LINTER}" --target="${INPUTS_TARGET}" --output="${GITHUB_WORKSPACE}/${INPUTS_OUTPUT}" || ( echo "::error::${INPUTS_LINTER} failed to run for Python ${INPUTS_PYTHON_VERSION}" && exit 1 )
