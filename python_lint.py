@@ -654,8 +654,8 @@ def fixit_linter(target: Path) -> Optional[dict]:
 
 def make_paths_relative_to_target(runs: List[dict], target: Path) -> None:
     """Make all paths relative to the target."""
-    for run in runs:
-        for result in run["results"]:
+    for sarif_run in runs:
+        for result in sarif_run["results"]:
             for location in result["locations"]:
                 uri = Path(location["physicalLocation"]["artifactLocation"]["uri"])
                 if uri.is_absolute():
