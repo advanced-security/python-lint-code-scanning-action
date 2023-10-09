@@ -14,9 +14,10 @@ jobs:
     strategy:
       matrix:
         linter: [flake8, pylint, ruff, mypy, pytype, pyright, fixit]
+      fail-fast: false
     steps:
       - name: Run Python Lint
-        uses: aegilops/python-lint-code-scanning-action@v0.0.1
+        uses: advanced-security/python-lint-code-scanning-action@v1.0.0
         with:
           linter: ${{ matrix.linter }}
           python-version: 3.10
