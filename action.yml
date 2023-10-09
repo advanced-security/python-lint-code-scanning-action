@@ -59,7 +59,7 @@ runs:
     - name: Run Python Lint
       run: |
         echo "::notice::Using python version ${INPUTS_PYTHON_VERSION}"
-        echo "::debug::Debug is ${RUNNER_DEBUG}"
+        echo "::notice::Debug is ${RUNNER_DEBUG}"
         if [[ "${OSTYPE}" == "msys" ]]; then
           PYTHON_CMD=python
         else
