@@ -43,16 +43,17 @@ runs:
           if [[ "${INPUTS_LINTER}" == "fixit" ]]; then
             "${PYTHON_CMD}" -mpip install "fixit >1" --pre || echo "::error::fixit 2 is not available for Python ${INPUTS_PYTHON_VERSION}"
           else
-            "${PYTHON_CMD}" -mpip install "${INPUTS_LINTER}" || echo "::error::${INPUTS_LINTER} failed to install for Python ${INPUTS_PYTHON_VERSION}"
+            "${PYTHON_CMD}" -mpip install "${INPUTS_LINTER}" || ( echo "::error::${INPUTS_LINTER} failed to install for Python ${INPUTS_PYTHON_VERSION}" && exit 1 )
           fi
           if [[ "${install_flake8_formatter_linters[*]}" =~ (^|[^[:alpha:]])${INPUTS_LINTER}([^[:alpha:]]|$) ]]; then
             echo "::notice::installing flake8_sarif_formatter for ${INPUTS_LINTER}"
             "${PYTHON_CMD}" -mpip install 'git+https://github.com/aegilops/flake8_sarif_formatter.git#egg=flake8_sarif_formatter'
           fi
 
-          "${PYTHON_CMD}" "${GITHUB_ACTION_PATH}"/python_lint.py "${INPUTS_LINTER}" --target="${INPUTS_TARGET}" --output="${GITHUB_WORKSPACE}/${INPUTS_OUTPUT}" || echo "::error::${INPUTS_LINTER} failed to run for Python ${INPUTS_PYTHON_VERSION}"
+          "${PYTHON_CMD}" "${GITHUB_ACTION_PATH}"/python_lint.py "${INPUTS_LINTER}" --target="${INPUTS_TARGET}" --output="${GITHUB_WORKSPACE}/${INPUTS_OUTPUT}" || ( echo "::error::${INPUTS_LINTER} failed to run for Python ${INPUTS_PYTHON_VERSION}" && exit 1 )
         else
           echo "::error::invalid linter ${INPUTS_LINTER}; choose one of ${linters[*]}"
+          exit 1
         fi
       env:
         INPUTS_LINTER: ${{ inputs.linter }}
