@@ -19,11 +19,6 @@ inputs:
     required: false
     default: '3.10'
     choices: ['3.12', '3.11', '3.10', '3.9', '3.8', '3.7']
-  debug:
-    description: 'Whether to run in debug mode'
-    required: false
-    default: 'false'
-    choices: ['true', 'false']
   ruff-version:
     description: 'The version of ruff to use'
     required: false
@@ -116,7 +111,7 @@ runs:
             "${PYTHON_CMD}" -mpip install flake8-sarif-formatter || ( echo "::error::flake8-sarif-formatter failed to install for Python ${INPUTS_PYTHON_VERSION}" && exit 1 )
           fi
 
-          if [[ "${INPUTS_DEBUG}" == "true" ]]; then
+          if [[ "${RUNNER_DEBUG}" == "1" ]]; then
             EXTRA_LINTER_SCRIPT_FLAGS=" --debug"
           fi
 
@@ -137,7 +132,6 @@ runs:
         INPUTS_PYRIGHT_VERSION: ${{ inputs.pyright-version }}
         INPUTS_PYTYPE_VERSION: ${{ inputs.pytype-version }}
         INPUTS_FIXIT_VERSION: ${{ inputs.fixit-version }}
-        INPUTS_DEBUG: ${{ inputs.debug }}
       shell: bash
     - name: Upload SARIF
       if: ${{ hashFiles(inputs.output) != '' }}
