@@ -59,6 +59,7 @@ runs:
     - name: Run Python Lint
       run: |
         echo "::notice::Using python version ${INPUTS_PYTHON_VERSION}"
+        echo "::debug::Debug is ${RUNNER_DEBUG}"
         if [[ "${OSTYPE}" == "msys" ]]; then
           PYTHON_CMD=python
         else
@@ -110,8 +111,6 @@ runs:
             echo "::notice::installing flake8_sarif_formatter for ${INPUTS_LINTER}"
             "${PYTHON_CMD}" -mpip install flake8-sarif-formatter || ( echo "::error::flake8-sarif-formatter failed to install for Python ${INPUTS_PYTHON_VERSION}" && exit 1 )
           fi
-
-          echo "::debug::Debug is ${RUNNER_DEBUG}"
 
           if [[ "${RUNNER_DEBUG}" == "1" ]]; then
             EXTRA_LINTER_SCRIPT_FLAGS=" --debug"
