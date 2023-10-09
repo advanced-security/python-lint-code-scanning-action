@@ -90,11 +90,12 @@ def ruff_format_sarif(results: List[Dict[str, Any]], target: Path) -> dict:
     sarif_run = make_sarif_run("Ruff")
 
     from flake8_sarif_formatter import flake8_sarif_formatter
+
     flake8_rules = flake8_sarif_formatter.get_flake8_rules()
 
     for result in results:
         code = result["code"]
-        rule_id = f'ruff/{code}'
+        rule_id = f"ruff/{code}"
         filename = result["filename"]
         message = result["message"]
 
@@ -137,9 +138,7 @@ def ruff_format_sarif(results: List[Dict[str, Any]], target: Path) -> dict:
         rules = sarif_run["tool"]["driver"]["rules"]
 
         if rule_id not in [rule["id"] for rule in rules]:
-            short_description = (
-                flake8_rules[code].get("message", code) if code in flake8_rules else code
-            )
+            short_description = flake8_rules[code].get("message", code) if code in flake8_rules else code
 
             # TODO: when Code Scanning supports it, add "content" as longDescription
 
