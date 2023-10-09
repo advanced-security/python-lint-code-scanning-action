@@ -711,7 +711,7 @@ def main() -> None:
 
     if len(sarif_runs) == 0:
         LOG.info("No SARIF runs to output")
-        sys.exit(1)
+        sys.exit(0)
 
     make_paths_relative_to_target(sarif_runs, target)
 
