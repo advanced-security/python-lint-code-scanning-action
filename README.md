@@ -41,6 +41,16 @@ The linter/type checker can be one or more of `flake8`, `pylint`, `ruff`, `mypy`
 
 ### Action
 
+#### Configure the linters
+
+Configure the linters using a configuration file in your repository, appropriate to the linter.
+
+Many can use `pyproject.toml`, but not all.
+
+Example `pyproject.toml` and `.flake8` files for linting this repository are included.
+
+#### Call the Action with a workflow
+
 ```yaml
 use: advanced-security/python-lint-code-scanning-action@v1
 with:
@@ -94,11 +104,21 @@ jobs:
           linter: flake8
 ```
 
-Configure the linters using a configuration file in your repository, appropriate to the linter.
+Pin the version of a linter, e.g. if the latest version is incompatible with this Action.
 
-Many can use `pyproject.toml`, but not all.
+> ℹ️ Remember to put quotes around version strings so they are not interpreted as floating point numbers.
 
-Example `pyproject.toml` and `.flake8` files for linting this repository are included.
+```yaml
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - run: python3 -mpip install flake8-bugbear
+      - use: advanced-security/python-lint-code-scanning-action@v1
+        with:
+          linter: ruff
+          ruff-version: "0.0.257"
+```
 
 ## FAQ
 
@@ -139,6 +159,12 @@ Actions lets you do a matrix job, which does great work in parallelising things.
 We could use Python multi-processing to run them all in parallel, but that doesn't make such sense on standard GitHub runners.
 
 If you want to run them all at once you can call the underlying script with multiple linters, but that feature is really just to make testing easier, since they run in series.
+
+### Why do I see an error, but the run is not marked as having failed?
+
+This avoids errors with a single linter resulting in the whole run being marked as "in error". It is the Code Scanning results that are of interest, not whether every linter ran successfully.
+
+You should check for errors in the Actions log and resolve them. It might be better to have an option to report failure if a linter does not run properly - raise an issue or a PR if you want that.
 
 ## License
 
