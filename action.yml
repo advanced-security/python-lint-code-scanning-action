@@ -116,7 +116,24 @@ runs:
             EXTRA_LINTER_SCRIPT_FLAGS=" --debug"
           fi
 
-          "${PYTHON_CMD}" "${GITHUB_ACTION_PATH}"/python_lint.py "${INPUTS_LINTER}" --target="${INPUTS_TARGET}" --output="${GITHUB_WORKSPACE}/${INPUTS_OUTPUT}" ${EXTRA_LINTER_SCRIPT_FLAGS} || ( echo "::error::${INPUTS_LINTER} failed to run for Python ${INPUTS_PYTHON_VERSION}" && exit 1 )
+          "${PYTHON_CMD}" "${GITHUB_ACTION_PATH}"/python_lint.py "${INPUTS_LINTER}" --target="${INPUTS_TARGET}" --output="${GITHUB_WORKSPACE}/${INPUTS_OUTPUT}" ${EXTRA_LINTER_SCRIPT_FLAGS}
+          
+          retval=$?
+
+          if [[ $retval -ne 0 ]]; then
+            # don't fail "hard" if it's known failures that we cannot account for (yet)
+            # pytype doesn't support 3.11+ yet
+            if [[ "${INPUTS_LINTER}" == "pytype" -a "${INPUTS_PYTHON_VERSION}" =~ ^3\.(1[1-9]|[2-9][0-9]$ ]]; then
+              echo "::warning::pytype failed to run for Python ${INPUTS_PYTHON_VERSION}; this is likely due to pytype not yet supporting Python ${INPUTS_PYTHON_VERSION}"
+              exit 0
+            # fixit>1 doesn't work for 3.7
+            elif [[ "${INPUTS_LINTER}" == "fixit" -a "${INPUTS_PYTHON_VERSION}" == "3.7" ]]; then
+              echo "::warning::fixit failed to run for Python ${INPUTS_PYTHON_VERSION}; this is likely due to fixit not supporting Python ${INPUTS_PYTHON_VERSION}"
+              exit 0
+            fi
+
+            echo "::error::${INPUTS_LINTER} failed to run for Python ${INPUTS_PYTHON_VERSION}" && exit 1
+          fi
         else
           echo "::error::invalid linter ${INPUTS_LINTER}; choose one of ${linters[*]}"
           exit 1
