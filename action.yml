@@ -58,8 +58,7 @@ runs:
         python-version: ${{ inputs.python-version }}
     - name: Run Python Lint
       run: |
-        echo "::notice::Using python version ${INPUTS_PYTHON_VERSION}"
-
+        echo "::debug::Running Python Lint for ${INPUTS_LINTER} on ${INPUTS_TARGET} with Python ${INPUTS_PYTHON_VERSION}"
         # set python command
         if [[ "${OSTYPE}" == "msys" ]]; then
           PYTHON_CMD=python
@@ -116,6 +115,8 @@ runs:
             fi
           fi
 
+          echo "::debug::Installing ${INPUTS_LINTER}${LINTER_VERSION_CONSTRAINT} for Python ${INPUTS_PYTHON_VERSION}"
+
           # install linter
           if ! "${PYTHON_CMD}" -mpip install "${INPUTS_LINTER}${LINTER_VERSION_CONSTRAINT}" ${EXTRA_PIP_FLAGS}; then
             echo "::error::${INPUTS_LINTER}${LINTER_VERSION_CONSTRAINT} failed to install for Python ${INPUTS_PYTHON_VERSION}"
@@ -128,7 +129,7 @@ runs:
 
           # install flake8-sarif-formatter if needed
           if [[ "${install_flake8_formatter_linters[*]}" =~ (^|[^[:alpha:]])${INPUTS_LINTER}([^[:alpha:]]|$) ]]; then
-            echo "::notice::installing flake8_sarif_formatter for ${INPUTS_LINTER}"
+            echo "::debug::Installing flake8_sarif_formatter for ${INPUTS_LINTER}"
             "${PYTHON_CMD}" -mpip install flake8-sarif-formatter || ( echo "::error::flake8-sarif-formatter failed to install for Python ${INPUTS_PYTHON_VERSION}" && exit 1 )
           fi
 
