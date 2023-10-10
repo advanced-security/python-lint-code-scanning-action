@@ -1,5 +1,8 @@
 name: Python Lint Code Scanning Action
 description: Runs a python linter of your choice, outputting SARIF
+branding:
+  icon: 'check-circle'
+  color: 'blue'
 inputs:
   linter:
     description: 'The linter to use'
