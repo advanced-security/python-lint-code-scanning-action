@@ -118,7 +118,7 @@ runs:
           echo "::debug::Installing ${INPUTS_LINTER}${LINTER_VERSION_CONSTRAINT} for Python ${INPUTS_PYTHON_VERSION}"
 
           # install linter
-          if ! "${PYTHON_CMD}" -mpip install "${INPUTS_LINTER}${LINTER_VERSION_CONSTRAINT}" ${EXTRA_PIP_FLAGS}; then
+          if ! "${PYTHON_CMD}" -mpip install -q "${INPUTS_LINTER}${LINTER_VERSION_CONSTRAINT}" ${EXTRA_PIP_FLAGS}; then
             echo "::error::${INPUTS_LINTER}${LINTER_VERSION_CONSTRAINT} failed to install for Python ${INPUTS_PYTHON_VERSION}"
             # if it is fixit on 3.7, just exit 0, we know it's not available
             if [[ "${INPUTS_LINTER}" == "fixit" && "${INPUTS_PYTHON_VERSION}" == "3.7" ]]; then
@@ -130,7 +130,7 @@ runs:
           # install flake8-sarif-formatter if needed
           if [[ "${install_flake8_formatter_linters[*]}" =~ (^|[^[:alpha:]])${INPUTS_LINTER}([^[:alpha:]]|$) ]]; then
             echo "::debug::Installing flake8_sarif_formatter for ${INPUTS_LINTER}"
-            "${PYTHON_CMD}" -mpip install flake8-sarif-formatter || ( echo "::error::flake8-sarif-formatter failed to install for Python ${INPUTS_PYTHON_VERSION}" && exit 1 )
+            "${PYTHON_CMD}" -mpip install -q flake8-sarif-formatter || ( echo "::error::flake8-sarif-formatter failed to install for Python ${INPUTS_PYTHON_VERSION}" && exit 1 )
           fi
 
           # set debug output
