@@ -142,11 +142,7 @@ runs:
             # don't fail "hard" if it's known failures that we cannot account for (yet)
             # pytype doesn't support 3.11+ yet
             if [[ "${INPUTS_LINTER}" == "pytype" && "${INPUTS_PYTHON_VERSION}" =~ ^3\.(1[1-9]|[2-9][0-9])$ ]]; then
-              echo "::warning::pytype failed to run for Python ${INPUTS_PYTHON_VERSION}; this is likely due to pytype not yet supporting Python ${INPUTS_PYTHON_VERSION}"
-              exit 0
-            # fixit>1 doesn't work for 3.7
-            elif [[ "${INPUTS_LINTER}" == "fixit" && "${INPUTS_PYTHON_VERSION}" == "3.7" ]]; then
-              echo "::warning::fixit failed to run for Python ${INPUTS_PYTHON_VERSION}; this is likely due to fixit not supporting Python ${INPUTS_PYTHON_VERSION}"
+              echo "::error::pytype failed to run for Python ${INPUTS_PYTHON_VERSION}; this is likely due to pytype not yet supporting Python ${INPUTS_PYTHON_VERSION}"
               exit 0
             fi
 
