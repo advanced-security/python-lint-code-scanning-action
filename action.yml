@@ -59,19 +59,28 @@ runs:
     - name: Run Python Lint
       run: |
         echo "::notice::Using python version ${INPUTS_PYTHON_VERSION}"
-        echo "::debug::Debug is ${RUNNER_DEBUG}"
+
+        # set python command
         if [[ "${OSTYPE}" == "msys" ]]; then
           PYTHON_CMD=python
         else
           PYTHON_CMD="python${INPUTS_PYTHON_VERSION}"
         fi
+
+        # upgrade pip
         "${PYTHON_CMD}" -mpip install --upgrade pip
+
+        # set up linter variables
         linters=('ruff' 'flake8' 'pylint' 'mypy' 'pyright' 'pytype' 'fixit')
         install_flake8_formatter_linters=('ruff', 'flake8')
         EXTRA_PIP_FLAGS=''
         LINTER_VERSION_CONSTRAINT=''
         EXTRA_LINTER_SCRIPT_FLAGS=''
+
+        # check we're using a valid linter
         if [[ "${linters[*]}" =~ (^|[^[:alpha:]])${INPUTS_LINTER}([^[:alpha:]]|$) ]]; then
+
+          # collect version choices, if they've been made
           if [[ "${INPUTS_LINTER}" == "fixit" ]]; then
             if [[ "${INPUTS_FIXIT_VERSION}" == "latest" ]]; then
               LINTER_VERSION_CONSTRAINT=' >1'
@@ -106,21 +115,30 @@ runs:
               fi
             fi
           fi
-          "${PYTHON_CMD}" -mpip install "${INPUTS_LINTER}${LINTER_VERSION_CONSTRAINT}" ${EXTRA_PIP_FLAGS} || ( echo "::error::${INPUTS_LINTER}${LINTER_VERSION_CONSTRAINT} failed to install for Python ${INPUTS_PYTHON_VERSION}" && exit 1 )
+
+          # install linter
+          if ! "${PYTHON_CMD}" -mpip install "${INPUTS_LINTER}${LINTER_VERSION_CONSTRAINT}" ${EXTRA_PIP_FLAGS}; then
+            echo "::error::${INPUTS_LINTER}${LINTER_VERSION_CONSTRAINT} failed to install for Python ${INPUTS_PYTHON_VERSION}"
+            # if it is fixit on 3.7, just exit 0, we know it's not available
+            if [[ "${INPUTS_LINTER}" == "fixit" && "${INPUTS_PYTHON_VERSION}" == "3.7" ]]; then
+              exit 0
+            fi
+            exit 1
+          fi
+
+          # install flake8-sarif-formatter if needed
           if [[ "${install_flake8_formatter_linters[*]}" =~ (^|[^[:alpha:]])${INPUTS_LINTER}([^[:alpha:]]|$) ]]; then
             echo "::notice::installing flake8_sarif_formatter for ${INPUTS_LINTER}"
             "${PYTHON_CMD}" -mpip install flake8-sarif-formatter || ( echo "::error::flake8-sarif-formatter failed to install for Python ${INPUTS_PYTHON_VERSION}" && exit 1 )
           fi
 
+          # set debug output
           if [[ "${RUNNER_DEBUG}" == "1" ]]; then
             EXTRA_LINTER_SCRIPT_FLAGS=" --debug"
           fi
 
-          "${PYTHON_CMD}" "${GITHUB_ACTION_PATH}"/python_lint.py "${INPUTS_LINTER}" --target="${INPUTS_TARGET}" --output="${GITHUB_WORKSPACE}/${INPUTS_OUTPUT}" ${EXTRA_LINTER_SCRIPT_FLAGS}
-          
-          retval=$?
-
-          if [[ $retval -ne 0 ]]; then
+          # run linter
+          if ! "${PYTHON_CMD}" "${GITHUB_ACTION_PATH}"/python_lint.py "${INPUTS_LINTER}" --target="${INPUTS_TARGET}" --output="${GITHUB_WORKSPACE}/${INPUTS_OUTPUT}" ${EXTRA_LINTER_SCRIPT_FLAGS}; then
             # don't fail "hard" if it's known failures that we cannot account for (yet)
             # pytype doesn't support 3.11+ yet
             if [[ "${INPUTS_LINTER}" == "pytype" && "${INPUTS_PYTHON_VERSION}" =~ ^3\.(1[1-9]|[2-9][0-9])$ ]]; then
