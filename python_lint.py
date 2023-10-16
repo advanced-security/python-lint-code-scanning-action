@@ -467,7 +467,11 @@ def pyright_format_sarif(results: dict, target: Path) -> dict:
 
 def pyright_linter(target: Path, typeshed_path: Path) -> Optional[dict]:
     """Run the pyright linter."""
-    process = run(["pyright", "--outputjson", "--typeshedpath", typeshed_path, target.absolute().as_posix()], capture_output=True, check=False)
+    process = run(
+        ["pyright", "--outputjson", "--typeshedpath", typeshed_path, target.absolute().as_posix()],
+        capture_output=True,
+        check=False,
+    )
 
     if process.stderr:
         LOG.error("STDERR: %s", process.stderr.decode("utf-8"))
@@ -553,7 +557,9 @@ def pytype_linter(target: Path, typeshed_path: Path) -> Optional[dict]:
     os.environ["TYPESHED_HOME"] = typeshed_path.as_posix()
 
     process = run(
-        ["pytype", "--exclude", ".pytype/", "--", target.as_posix()], capture_output=True, check=False,
+        ["pytype", "--exclude", ".pytype/", "--", target.as_posix()],
+        capture_output=True,
+        check=False,
     )
 
     if process.stderr:
@@ -575,7 +581,18 @@ def pytype_linter(target: Path, typeshed_path: Path) -> Optional[dict]:
 def pyre_linter(target: Path, typeshed_path: Path) -> Optional[dict]:
     """Run the pytype linter."""
     process = run(
-        ["pyre", "--source-directory", target.as_posix(), "--output", "sarif", "--typeshed", typeshed_path.as_posix(), "check"], capture_output=True, check=False
+        [
+            "pyre",
+            "--source-directory",
+            target.as_posix(),
+            "--output",
+            "sarif",
+            "--typeshed",
+            typeshed_path.as_posix(),
+            "check",
+        ],
+        capture_output=True,
+        check=False,
     )
 
     if process.stderr:
@@ -715,7 +732,7 @@ def add_args(parser: ArgumentParser) -> None:
     parser.add_argument("linter", choices=LINTERS.keys(), nargs="+", help="The linter(s) to use")
     parser.add_argument("--target", "-t", default=".", required=False, help="Target path for the linter")
     parser.add_argument("--output", "-o", default="python_linter.sarif", required=False, help="Output filename")
-    parser.add_argument("--typeshed-path",required=False, help="Path to typeshed")
+    parser.add_argument("--typeshed-path", required=False, help="Path to typeshed")
     parser.add_argument("--debug", "-d", action="store_true", required=False, help="Enable debug logging")
 
 
