@@ -134,8 +134,14 @@ runs:
           echo "::debug::Installing ${INPUTS_LINTER}${LINTER_VERSION_CONSTRAINT} for Python ${INPUTS_PYTHON_VERSION}"
 
           # install linter
-          if ! "${PYTHON_CMD}" -mpip install -q "${INPUTS_LINTER}${LINTER_VERSION_CONSTRAINT}" ${EXTRA_PIP_FLAGS}; then
-            echo "::error::${INPUTS_LINTER}${LINTER_VERSION_CONSTRAINT} failed to install for Python ${INPUTS_PYTHON_VERSION}"
+          LINTER_PACKAGE="${INPUTS_LINTER}"
+
+          if [[ "${INPUTS_LINTER}" == "pyre" ]]; then
+            LINTER_PACKAGE="pyre-check"
+          fi
+
+          if ! "${PYTHON_CMD}" -mpip install -q "${LINTER_PACKAGE}${LINTER_VERSION_CONSTRAINT}" ${EXTRA_PIP_FLAGS}; then
+            echo "::error::${LINTER_PACKAGE}${LINTER_VERSION_CONSTRAINT} failed to install for Python ${INPUTS_PYTHON_VERSION}"
             # if it is fixit on 3.7, just exit 0, we know it's not available
             if [[ "${INPUTS_LINTER}" == "fixit" && "${INPUTS_PYTHON_VERSION}" == "3.7" ]]; then
               exit 0
