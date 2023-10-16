@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 1.0.2 - 2023-10-16
+## 1.1.0 - 2023-10-16
 
 * Added Pyre
 * Typecheckers now use a current clone of `typeshed` vs their shipped version
