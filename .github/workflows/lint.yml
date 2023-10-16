@@ -8,14 +8,17 @@ on:
   schedule:
     - cron: '22 3 * * 2'
   workflow_dispatch:
+
 jobs:
   lint:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         linter: ['flake8', 'pylint', 'ruff', 'mypy', 'pytype', 'pyright', 'fixit']
-        python-version: ['3.7', '3.8', '3.9', '3.10', '3.11']
+        python-version: ['3.7', '3.8', '3.9', '3.10', '3.11', '3.12']
+        os: [ubuntu-latest, windows-latest, macos-latest]
       fail-fast: false
+
     steps:
       # install dependencies for all linters, then run the linter, so we don't get import failures when the linters scan the code
       # upgrade pip, so that we can install flake8_sarif_formatter properly from the git repo
