@@ -81,7 +81,7 @@ runs:
         "${PYTHON_CMD}" -mpip install --upgrade pip
 
         # set up linter variables
-        linters=('ruff' 'flake8' 'pylint' 'mypy' 'pyright' 'pytype' 'fixit', 'pyre')
+        linters=('ruff' 'flake8' 'pylint' 'mypy' 'pyright' 'pytype' 'fixit' 'pyre')
         install_flake8_formatter_linters=('ruff', 'flake8')
         install_typeshed_linters=('pyre', 'pytype', 'mypy', 'pyright')
         EXTRA_PIP_FLAGS=''
