@@ -11,6 +11,7 @@ Copyright (c) GitHub, 2023
 """
 
 import sys
+import os
 import logging
 from argparse import ArgumentParser
 from pathlib import Path
@@ -54,7 +55,7 @@ def make_sarif_run(tool_name: str) -> dict:
     return sarif_run
 
 
-def flake8_linter(target: Path) -> None:
+def flake8_linter(target: Path, *args) -> None:
     """Run the flake8 linter.
 
     In contrast to the other linters, flake8 has plugin architecture.
@@ -154,7 +155,7 @@ def ruff_format_sarif(results: List[Dict[str, Any]], target: Path) -> dict:
     return sarif_run
 
 
-def ruff_linter(target: Path) -> Optional[dict]:
+def ruff_linter(target: Path, *args) -> Optional[dict]:
     """Run the ruff linter."""
     try:
         # pylint: disable=import-outside-toplevel
@@ -256,7 +257,7 @@ def pylint_format_sarif(results: List[Dict[str, Any]], target: Path) -> dict:
     return sarif_run
 
 
-def pylint_linter(target: Path) -> Optional[dict]:
+def pylint_linter(target: Path, *args) -> Optional[dict]:
     """Run the pylint linter."""
     process = run(
         ["pylint", "--output-format=json", "--recursive=y", target.absolute().as_posix()],
@@ -371,7 +372,7 @@ def mypy_format_sarif(mypy_results: str, target: Path) -> dict:
     return sarif_run
 
 
-def mypy_linter(target: Path) -> Optional[dict]:
+def mypy_linter(target: Path, typeshed_path: Path) -> Optional[dict]:
     """Run the mypy linter."""
     mypy_args = [
         "--install-types",
@@ -383,6 +384,8 @@ def mypy_linter(target: Path) -> Optional[dict]:
         "--show-column-numbers",
         "--show-error-end",
         "--show-absolute-path",
+        "--custom-typeshed-dir",
+        typeshed_path.as_posix(),
     ]
 
     process_lint = run(["mypy", *mypy_args, target.absolute().as_posix()], capture_output=True, check=False)
@@ -462,9 +465,9 @@ def pyright_format_sarif(results: dict, target: Path) -> dict:
     return sarif_run
 
 
-def pyright_linter(target: Path) -> Optional[dict]:
+def pyright_linter(target: Path, typeshed_path: Path) -> Optional[dict]:
     """Run the pyright linter."""
-    process = run(["pyright", "--outputjson", target.absolute().as_posix()], capture_output=True, check=False)
+    process = run(["pyright", "--outputjson", "--typeshedpath", typeshed_path, target.absolute().as_posix()], capture_output=True, check=False)
 
     if process.stderr:
         LOG.error("STDERR: %s", process.stderr.decode("utf-8"))
@@ -545,10 +548,12 @@ def pytype_format_sarif(results: str, target: Path) -> dict:
     return sarif_run
 
 
-def pytype_linter(target: Path) -> Optional[dict]:
+def pytype_linter(target: Path, typeshed_path: Path) -> Optional[dict]:
     """Run the pytype linter."""
+    os.environ["TYPESHED_HOME"] = typeshed_path.as_posix()
+
     process = run(
-        ["pytype", "--exclude", ".pytype/", "--", target.absolute().as_posix()], capture_output=True, check=False
+        ["pytype", "--exclude", ".pytype/", "--", target.as_posix()], capture_output=True, check=False,
     )
 
     if process.stderr:
@@ -565,6 +570,33 @@ def pytype_linter(target: Path) -> Optional[dict]:
     sarif_run = pytype_format_sarif(results, target)
 
     return sarif_run
+
+
+def pyre_linter(target: Path, typeshed_path: Path) -> Optional[dict]:
+    """Run the pytype linter."""
+    process = run(
+        ["pyre", "--source-directory", target.as_posix(), "--output", "sarif", "--typeshed", typeshed_path.as_posix(), "check"], capture_output=True, check=False
+    )
+
+    if process.stderr:
+        LOG.debug("STDERR: %s", process.stderr.decode("utf-8"))
+
+    if not process.stdout:
+        LOG.error("No output from pytype")
+        return None
+
+    try:
+        sarif = json.loads(process.stdout.decode("utf-8"))
+    except json.JSONDecodeError as err:
+        LOG.error("Unable to parse pyre output: %s", err)
+        LOG.debug("Output: %s", process.stdout.decode("utf-8"))
+        return None
+
+    if "runs" in sarif and len(sarif["runs"]) > 0:
+        return sarif["runs"][0]
+
+    LOG.error("SARIF not correctly formed, or no runs to output")
+    return None
 
 
 def make_fixit_description(rule: str) -> str:
@@ -670,6 +702,7 @@ LINTERS = {
     "mypy": mypy_linter,
     "pyright": pyright_linter,
     "fixit": fixit_linter,
+    "pyre": pyre_linter,
 }
 
 # pytype is only supported on Python 3.10 and below, at the time of writing
@@ -682,6 +715,7 @@ def add_args(parser: ArgumentParser) -> None:
     parser.add_argument("linter", choices=LINTERS.keys(), nargs="+", help="The linter(s) to use")
     parser.add_argument("--target", "-t", default=".", required=False, help="Target path for the linter")
     parser.add_argument("--output", "-o", default="python_linter.sarif", required=False, help="Output filename")
+    parser.add_argument("--typeshed-path",required=False, help="Path to typeshed")
     parser.add_argument("--debug", "-d", action="store_true", required=False, help="Enable debug logging")
 
 
@@ -700,11 +734,12 @@ def main() -> None:
     sarif_runs: List[dict] = []
 
     target = Path(args.target).resolve().absolute()
+    typeshed_path = Path(args.typeshed_path).resolve().absolute()
 
     for linter in args.linter:
         LOG.debug("Running %s", linter)
 
-        sarif_run = LINTERS[linter](target)
+        sarif_run = LINTERS[linter](target, typeshed_path)
 
         if sarif_run is not None:
             sarif_runs.append(sarif_run)
