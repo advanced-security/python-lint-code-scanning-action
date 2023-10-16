@@ -3,3 +3,6 @@ build
 .ruff_cache
 *.sarif
 *.pyc
+.pyre
+.pytype
+.mypy_cache

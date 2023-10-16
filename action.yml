@@ -8,7 +8,7 @@ inputs:
     description: 'The linter to use'
     required: true
     default: 'flake8'
-    choices: ['ruff', 'flake8', 'pylint', 'mypy', 'pyright', 'pytype', 'fixit']
+    choices: ['ruff', 'flake8', 'pylint', 'mypy', 'pyright', 'pytype', 'fixit', 'pyre']
   target:
     description: 'The target to lint'
     required: true
@@ -50,6 +50,14 @@ inputs:
     description: 'The version of fixit to use'
     required: false
     default: 'latest'
+  pyre-version:
+    description: 'The version of pyre to use'
+    required: false
+    default: 'latest'
+  typeshed-version:
+    description: 'The version of typeshed to use'
+    required: false
+    default: 'main'
 runs:
   using: 'composite'
   steps:
@@ -73,8 +81,9 @@ runs:
         "${PYTHON_CMD}" -mpip install --upgrade pip
 
         # set up linter variables
-        linters=('ruff' 'flake8' 'pylint' 'mypy' 'pyright' 'pytype' 'fixit')
+        linters=('ruff' 'flake8' 'pylint' 'mypy' 'pyright' 'pytype' 'fixit' 'pyre')
         install_flake8_formatter_linters=('ruff', 'flake8')
+        install_typeshed_linters=('pyre', 'pytype', 'mypy', 'pyright')
         EXTRA_PIP_FLAGS=''
         LINTER_VERSION_CONSTRAINT=''
         EXTRA_LINTER_SCRIPT_FLAGS=''
@@ -115,14 +124,24 @@ runs:
               if [[ "${INPUTS_PYTYPE_VERSION}" != "latest" ]]; then
                 LINTER_VERSION_CONSTRAINT="==${INPUTS_PYTYPE_VERSION}"
               fi
+            elif [[ "${INPUTS_LINTER}" == "pyre" ]]; then
+              if [[ "${INPUTS_PYRE_VERSION}" != "latest" ]]; then
+                LINTER_VERSION_CONSTRAINT="==${INPUTS_PYRE_VERSION}"
+              fi
             fi
           fi
 
           echo "::debug::Installing ${INPUTS_LINTER}${LINTER_VERSION_CONSTRAINT} for Python ${INPUTS_PYTHON_VERSION}"
 
           # install linter
-          if ! "${PYTHON_CMD}" -mpip install -q "${INPUTS_LINTER}${LINTER_VERSION_CONSTRAINT}" ${EXTRA_PIP_FLAGS}; then
-            echo "::error::${INPUTS_LINTER}${LINTER_VERSION_CONSTRAINT} failed to install for Python ${INPUTS_PYTHON_VERSION}"
+          LINTER_PACKAGE="${INPUTS_LINTER}"
+
+          if [[ "${INPUTS_LINTER}" == "pyre" ]]; then
+            LINTER_PACKAGE="pyre-check"
+          fi
+
+          if ! "${PYTHON_CMD}" -mpip install -q "${LINTER_PACKAGE}${LINTER_VERSION_CONSTRAINT}" ${EXTRA_PIP_FLAGS}; then
+            echo "::error::${LINTER_PACKAGE}${LINTER_VERSION_CONSTRAINT} failed to install for Python ${INPUTS_PYTHON_VERSION}"
             # if it is fixit on 3.7, just exit 0, we know it's not available
             if [[ "${INPUTS_LINTER}" == "fixit" && "${INPUTS_PYTHON_VERSION}" == "3.7" ]]; then
               exit 0
@@ -139,6 +158,14 @@ runs:
           # set debug output
           if [[ "${RUNNER_DEBUG}" == "1" ]]; then
             EXTRA_LINTER_SCRIPT_FLAGS=" --debug"
+          fi
+
+          # install typeshed if needed (for typecheckers)
+          if [[ "${install_typeshed_linters[*]}" =~ (^|[^[:alpha:]])${INPUTS_LINTER}([^[:alpha:]]|$) ]]; then
+            echo "::debug::Installing typeshed for ${INPUTS_LINTER}"
+            # clone from GitHub
+            gh repo clone python/typeshed -- --depth 1 --branch "${INPUTS_TYPESHED_VERSION}" "${GITHUB_WORKSPACE}/typeshed" || ( echo "::error::typeshed failed to install for Python ${INPUTS_PYTHON_VERSION}" && exit 1 )
+            EXTRA_LINTER_SCRIPT_FLAGS+=" --typeshed-path=${GITHUB_WORKSPACE}/typeshed"
           fi
 
           # run linter
@@ -168,6 +195,8 @@ runs:
         INPUTS_PYRIGHT_VERSION: ${{ inputs.pyright-version }}
         INPUTS_PYTYPE_VERSION: ${{ inputs.pytype-version }}
         INPUTS_FIXIT_VERSION: ${{ inputs.fixit-version }}
+        INPUTS_PYRE_VERSION: ${{ inputs.pyre-version }}
+        INPUTS_TYPESHED_VERSION: ${{ inputs.typeshed-version }}
       shell: bash
     - name: Upload SARIF
       if: ${{ hashFiles(inputs.output) != '' }}
