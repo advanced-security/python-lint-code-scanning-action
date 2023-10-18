@@ -751,7 +751,7 @@ def main() -> None:
     sarif_runs: List[dict] = []
 
     target = Path(args.target).resolve().absolute()
-    typeshed_path = Path(args.typeshed_path).resolve().absolute()
+    typeshed_path = Path(args.typeshed_path).resolve().absolute() if args.typeshed_path is not None else None
 
     for linter in args.linter:
         LOG.debug("Running %s", linter)
