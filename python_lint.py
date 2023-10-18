@@ -55,7 +55,7 @@ def make_sarif_run(tool_name: str) -> dict:
     return sarif_run
 
 
-def flake8_linter(target: Path, *args) -> None:
+def flake8_linter(target: Path, *_args) -> None:
     """Run the flake8 linter.
 
     In contrast to the other linters, flake8 has plugin architecture.
@@ -155,7 +155,7 @@ def ruff_format_sarif(results: List[Dict[str, Any]], target: Path) -> dict:
     return sarif_run
 
 
-def ruff_linter(target: Path, *args) -> Optional[dict]:
+def ruff_linter(target: Path, *_args) -> Optional[dict]:
     """Run the ruff linter."""
     try:
         # pylint: disable=import-outside-toplevel
@@ -257,7 +257,7 @@ def pylint_format_sarif(results: List[Dict[str, Any]], target: Path) -> dict:
     return sarif_run
 
 
-def pylint_linter(target: Path, *args) -> Optional[dict]:
+def pylint_linter(target: Path, *_args) -> Optional[dict]:
     """Run the pylint linter."""
     process = run(
         ["pylint", "--output-format=json", "--recursive=y", target.absolute().as_posix()],
@@ -680,7 +680,7 @@ def fixit_format_sarif(results: str, target: Path) -> dict:
     return sarif_run
 
 
-def fixit_linter(target: Path) -> Optional[dict]:
+def fixit_linter(target: Path, *_args) -> Optional[dict]:
     """Run the fixit linter, from Meta."""
     process = run(["fixit", "lint", target.absolute().as_posix()], capture_output=True, check=False)
 
