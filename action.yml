@@ -197,6 +197,7 @@ runs:
         INPUTS_FIXIT_VERSION: ${{ inputs.fixit-version }}
         INPUTS_PYRE_VERSION: ${{ inputs.pyre-version }}
         INPUTS_TYPESHED_VERSION: ${{ inputs.typeshed-version }}
+        GH_TOKEN: ${{ github.token }}
       shell: bash
     - name: Upload SARIF
       if: ${{ hashFiles(inputs.output) != '' }}
