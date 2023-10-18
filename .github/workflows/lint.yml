@@ -14,9 +14,9 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        linter: ['pyre'] # ['flake8', 'pylint', 'ruff', 'mypy', 'pytype', 'pyright', 'fixit', 'pyre']
-        python-version: ['3.11'] # ['3.7', '3.8', '3.9', '3.10', '3.11', '3.12']
-        os: ['ubuntu-latest'] # [ubuntu-latest, macos-latest] # doesn't yet work on Windows
+        linter: ['flake8', 'pylint', 'ruff', 'mypy', 'pytype', 'pyright', 'fixit', 'pyre']
+        python-version: ['3.7', '3.8', '3.9', '3.10', '3.11', '3.12']
+        os: [ubuntu-latest, macos-latest] # doesn't yet work on Windows
       fail-fast: false
 
     steps:
@@ -29,7 +29,7 @@ jobs:
           python3 -mpip install -q flake8 pylint ruff mypy pytype pyright fixit pyre-check
           python3 -mpip install -q flake8-sarif-formatter
       - name: Run Python Lint
-        uses: advanced-security/python-lint-code-scanning-action@fix-typeshed-and-token
+        uses: advanced-security/python-lint-code-scanning-action@main
         with:
           linter: ${{ matrix.linter }}
           python-version: ${{ matrix.python-version }}
