@@ -205,8 +205,7 @@ runs:
       with:
         sarif_file: ${{ inputs.output }}
     - name: Upload SARIF as debug artefact
-      # if we're in debug mode and we got results
-      if: runner.debug == '1'
+      if: ${{ always() && runner.debug == '1' && hashFiles(inputs.output) != '' }}
       uses: actions/upload-artifact@v3
       with:
         name: ${{ inputs.output }}
