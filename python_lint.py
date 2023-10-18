@@ -55,7 +55,7 @@ def make_sarif_run(tool_name: str) -> dict:
     return sarif_run
 
 
-def flake8_linter(target: Path, *args) -> None:
+def flake8_linter(target: Path, *_args) -> None:
     """Run the flake8 linter.
 
     In contrast to the other linters, flake8 has plugin architecture.
@@ -155,7 +155,7 @@ def ruff_format_sarif(results: List[Dict[str, Any]], target: Path) -> dict:
     return sarif_run
 
 
-def ruff_linter(target: Path, *args) -> Optional[dict]:
+def ruff_linter(target: Path, *_args) -> Optional[dict]:
     """Run the ruff linter."""
     try:
         # pylint: disable=import-outside-toplevel
@@ -257,7 +257,7 @@ def pylint_format_sarif(results: List[Dict[str, Any]], target: Path) -> dict:
     return sarif_run
 
 
-def pylint_linter(target: Path, *args) -> Optional[dict]:
+def pylint_linter(target: Path, *_args) -> Optional[dict]:
     """Run the pylint linter."""
     process = run(
         ["pylint", "--output-format=json", "--recursive=y", target.absolute().as_posix()],
@@ -680,7 +680,7 @@ def fixit_format_sarif(results: str, target: Path) -> dict:
     return sarif_run
 
 
-def fixit_linter(target: Path) -> Optional[dict]:
+def fixit_linter(target: Path, *_args) -> Optional[dict]:
     """Run the fixit linter, from Meta."""
     process = run(["fixit", "lint", target.absolute().as_posix()], capture_output=True, check=False)
 
@@ -710,6 +710,31 @@ def make_paths_relative_to_target(runs: List[dict], target: Path) -> None:
                     location["physicalLocation"]["artifactLocation"]["uri"] = (
                         uri.resolve().relative_to(target).as_posix()
                     )
+
+
+def fix_sarif_locations(runs: List[dict]) -> None:
+    """Fix the SARIF locations.
+    
+    Normalise values less than 1 to 1, e.g. -1 or 0.
+    
+    Convert strings to ints.
+
+    For anything that can't be converted to an int, set it to 1.
+    """
+    for sarif_run in runs:
+        for result in sarif_run["results"]:
+            for location in result["locations"]:
+                region = location["physicalLocation"]["region"]
+                for key in ("startLine", "endLine", "startColumn", "endColumn"):
+                    if key in region:
+                        try:
+                            region[key] = int(region[key])
+                        except ValueError:
+                            LOG.error("Unable to convert %s to int", region[key])
+                            region[key] = 1
+                            continue
+                        if region[key] < 1:
+                            region[key] = 1
 
 
 LINTERS = {
@@ -751,7 +776,7 @@ def main() -> None:
     sarif_runs: List[dict] = []
 
     target = Path(args.target).resolve().absolute()
-    typeshed_path = Path(args.typeshed_path).resolve().absolute()
+    typeshed_path = Path(args.typeshed_path).resolve().absolute() if args.typeshed_path is not None else None
 
     for linter in args.linter:
         LOG.debug("Running %s", linter)
