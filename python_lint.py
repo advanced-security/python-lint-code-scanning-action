@@ -712,6 +712,31 @@ def make_paths_relative_to_target(runs: List[dict], target: Path) -> None:
                     )
 
 
+def fix_sarif_locations(runs: List[dict]) -> None:
+    """Fix the SARIF locations.
+    
+    Normalise values less than 1 to 1, e.g. -1 or 0.
+    
+    Convert strings to ints.
+
+    For anything that can't be converted to an int, set it to 1.
+    """
+    for sarif_run in runs:
+        for result in sarif_run["results"]:
+            for location in result["locations"]:
+                region = location["physicalLocation"]["region"]
+                for key in ("startLine", "endLine", "startColumn", "endColumn"):
+                    if key in region:
+                        try:
+                            region[key] = int(region[key])
+                        except ValueError:
+                            LOG.error("Unable to convert %s to int", region[key])
+                            region[key] = 1
+                            continue
+                        if region[key] < 1:
+                            region[key] = 1
+
+
 LINTERS = {
     "pylint": pylint_linter,
     "ruff": ruff_linter,
