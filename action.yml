@@ -204,3 +204,11 @@ runs:
       uses: github/codeql-action/upload-sarif@v2
       with:
         sarif_file: ${{ inputs.output }}
+    - name: Upload SARIF as debug artefact
+      # if we're in debug mode and we got results
+      if: ${{ hashFiles(inputs.output) != '' && runner.debug == '1' }}
+      uses: actions/upload-artifact@v2
+      with:
+        name: ${{ inputs.output }}
+        path: ${{ inputs.output }}
+
