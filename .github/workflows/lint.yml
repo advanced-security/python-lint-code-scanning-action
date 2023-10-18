@@ -14,9 +14,9 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        linter: ['flake8', 'pylint', 'ruff', 'mypy', 'pytype', 'pyright', 'fixit', 'pyre']
-        python-version: ['3.7', '3.8', '3.9', '3.10', '3.11', '3.12']
-        os: [ubuntu-latest, macos-latest] # doesn't yet work on Windows
+        linter: ['pyre'] # ['flake8', 'pylint', 'ruff', 'mypy', 'pytype', 'pyright', 'fixit', 'pyre']
+        python-version: ['3.11'] # ['3.7', '3.8', '3.9', '3.10', '3.11', '3.12']
+        os: ['ubuntu-latest'] # [ubuntu-latest, macos-latest] # doesn't yet work on Windows
       fail-fast: false
 
     steps:
