@@ -164,7 +164,7 @@ runs:
           if [[ "${install_typeshed_linters[*]}" =~ (^|[^[:alpha:]])${INPUTS_LINTER}([^[:alpha:]]|$) ]]; then
             echo "::debug::Installing typeshed for ${INPUTS_LINTER}"
             # clone from GitHub
-            gh repo clone python/typeshed "${GITHUB_WORKSPACE}/typeshed" -- --depth 1 --branch "${INPUTS_TYPESHED_VERSION}" || ( echo "::error::typeshed failed to install for Python ${INPUTS_PYTHON_VERSION}" && exit 1 )
+            gh repo clone python/typeshed -- --depth 1 --branch "${INPUTS_TYPESHED_VERSION}" || ( echo "::error::typeshed failed to install for Python ${INPUTS_PYTHON_VERSION}" && exit 1 )
             EXTRA_LINTER_SCRIPT_FLAGS+=" --typeshed-path=${GITHUB_WORKSPACE}/typeshed"
           fi
 
