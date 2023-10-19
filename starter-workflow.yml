@@ -17,7 +17,7 @@ jobs:
       fail-fast: false
     steps:
       - name: Run Python Lint
-        uses: advanced-security/python-lint-code-scanning-action@v1.0.0
+        uses: advanced-security/python-lint-code-scanning-action@v1
         with:
           linter: ${{ matrix.linter }}
           python-version: 3.10
