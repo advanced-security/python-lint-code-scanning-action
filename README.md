@@ -52,8 +52,12 @@ Example `pyproject.toml` and `.flake8` files for linting this repository are inc
 
 #### Call the Action with a workflow
 
+First check out the repository with `github/checkout` of a supported version, so the code is available to the workflow.
+
+The simplest use is to use just one linter at a time:
+
 ```yaml
-use: advanced-security/python-lint-code-scanning-action@v1
+uses: advanced-security/python-lint-code-scanning-action@v1
 with:
   linter: flake8
 ```
@@ -68,7 +72,7 @@ jobs:
       matrix:
         linter: [flake8, pylint, ruff, mypy, pytype, pyright, fixit, pyre]
     steps:
-      - use: advanced-security/python-lint-code-scanning-action@v1
+      - uses: advanced-security/python-lint-code-scanning-action@v1
         with:
           linter: ${{ matrix.linter }}
 ```
@@ -84,7 +88,7 @@ jobs:
       matrix:
         python-version: [3.7, 3.8, 3.9, 3.10, 3.11]
     steps:
-      - use: advanced-security/python-lint-code-scanning-action@v1
+      - uses: advanced-security/python-lint-code-scanning-action@v1
         with:
           linter: flake8
           python-version: ${{ matrix.python-version }}
@@ -100,7 +104,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - run: python3 -mpip install flake8-bugbear
-      - use: advanced-security/python-lint-code-scanning-action@v1
+      - uses: advanced-security/python-lint-code-scanning-action@v1
         with:
           linter: flake8
 ```
@@ -114,7 +118,7 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      - use: advanced-security/python-lint-code-scanning-action@v1
+      - uses: advanced-security/python-lint-code-scanning-action@v1
         with:
           linter: ruff
           ruff-version: "0.0.257"
