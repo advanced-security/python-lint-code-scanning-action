@@ -25,9 +25,9 @@ jobs:
       - uses: actions/checkout@v4
       - name: Install pip dependencies
         run: |
-          python3 -mpip install -q --upgrade pip
-          python3 -mpip install -q flake8 pylint ruff mypy pytype pyright fixit pyre-check
-          python3 -mpip install -q flake8-sarif-formatter
+          python3 -mpip install -q --upgrade pip --break-system-packages
+          python3 -mpip install -q flake8 pylint ruff mypy pytype pyright fixit pyre-check --break-system-packages
+          python3 -mpip install -q flake8-sarif-formatter --break-system-packages
       - name: Run Python Lint
         uses: advanced-security/python-lint-code-scanning-action@main
         with:
