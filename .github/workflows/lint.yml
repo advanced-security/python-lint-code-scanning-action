@@ -30,9 +30,9 @@ jobs:
           else
             PIP_ARGS=""
           fi
-          python3 -mpip install -q --upgrade pip "${PIP_ARGS}"
-          python3 -mpip install -q flake8 pylint ruff mypy pytype pyright fixit pyre-check "${PIP_ARGS}"
-          python3 -mpip install -q flake8-sarif-formatter "${PIP_ARGS}"
+          python3 -mpip install ${PIP_ARGS} -q --upgrade pip
+          python3 -mpip install ${PIP_ARGS} -q flake8 pylint ruff mypy pytype pyright fixit pyre-check
+          python3 -mpip install ${PIP_ARGS} -q flake8-sarif-formatter
       - name: Run Python Lint
         uses: advanced-security/python-lint-code-scanning-action@main
         with:
