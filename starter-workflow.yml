@@ -1,4 +1,4 @@
-name: Python Lint Workflow
+name: Python Lint
 on:
   push:
     branches: [ "main" ]
@@ -8,15 +8,23 @@ on:
   schedule:
     - cron: '22 3 * * 2'  # please pick a different time
   workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+  security-events: write
+
 jobs:
   lint:
     runs-on: ubuntu-latest
+    
     strategy:
       matrix:
         linter: [flake8, pylint, ruff, mypy, pytype, pyright, fixit]
       fail-fast: false
+
     steps:
-      - name: Run Python Lint
+      - name: Python Lint
         uses: advanced-security/python-lint-code-scanning-action@v1
         with:
           linter: ${{ matrix.linter }}
