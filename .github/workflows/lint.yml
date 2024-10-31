@@ -38,8 +38,8 @@ jobs:
           # install packages one-by-one so it is clearer which fails, if it does
           python_packages=('flake8' 'pylint' 'ruff' 'mypy' 'pytype' 'pyright' 'fixit' 'pyre-check' 'flake8-sarif-formatter')
           for package in "${python_packages[@]}"; do
-            echo "::notice::Installing Python package $package"
-            python3 -mpip install ${PIP_ARGS} -q
+            echo "::notice::Installing Python package ${package}"
+            python3 -mpip install ${PIP_ARGS} -q "${package}"
           done
 
       - name: Run Python Lint
