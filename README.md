@@ -1,46 +1,34 @@
 # Python Linting Action
 
-> ℹ️ This is an _unofficial_ tool created by Field Security Services, and is not officially supported by GitHub.
+> [!NOTE]
+> This is an _unofficial_ tool created by Field Security Services, and is not officially supported by GitHub.
 
 This Action and Python script lets you run one of several Python linters and type checkers, and upload the results to GitHub's Code Scanning, which is part of [Advanced Security](https://docs.github.com/en/get-started/learning-about-github/about-github-advanced-security) (free for open source projects hosted on GitHub).
 
-## Supported linters
+## Supported linters and type checkers
 
-- [Flake8](https://flake8.pycqa.org/en/latest/)
-- [Pylint](https://www.pylint.org/)
-- [Ruff](https://beta.ruff.rs/)
-- [Mypy](https://mypy.readthedocs.io/en/stable/)
-- [Pytype](https://github.com/google/pytype/) - for Python 3.10 and below
-- [Pyright](https://github.com/microsoft/pyright)
-- [Fixit 2](https://fixit.readthedocs.io/en/stable/) - for Python 3.8 and above
-- [Pyre](https://pyre-check.org/)
+- Linters:
+  - [Flake8](https://flake8.pycqa.org/en/latest/)
+  - [Pylint](https://www.pylint.org/)
+  - [Ruff](https://beta.ruff.rs/)
+  - [Fixit 2](https://fixit.readthedocs.io/en/stable/) - for Python 3.8 and above
+- Type checkers:
+  - [Mypy](https://mypy.readthedocs.io/en/stable/)
+  - [Pytype](https://github.com/google/pytype/) - for Python 3.10 and below
+  - [Pyright](https://github.com/microsoft/pyright)
+  - [Pyre](https://pyre-check.org/)
 
 ## Requirements
 
-- Python 3.7 or higher
+- Python 3.7 or higher (3.8 or higher for MacOS on GitHub hosted runners)
 - For Pytype, Python 3.10 or lower
 - For Fixit, Python 3.8 or higher
 - GitHub Actions
+- GitHub Advanced Security (for private repositories)
 
 ## Usage
 
-### Command line
-
-First install the Flake8 SARIF formatter, if you are using Flake8:
-
-```bash
-python3 -m pip install flake8-sarif-formatter
-```
-
-Then run the linter:
-
-```bash
-python3 ./python_lint.py <linter> [<linter> ...] [<options>]
-```
-
-The linter/type checker can be one or more of `flake8`, `pylint`, `ruff`, `mypy`, `pytype`, `pyright`, `fixit`, `pyre`.
-
-### Action
+### Actions usage
 
 #### Configure the linters
 
@@ -111,7 +99,8 @@ jobs:
 
 Pin the version of a linter, e.g. if the latest version is incompatible with this Action.
 
-> ℹ️ Remember to put quotes around version strings so they are not interpreted as floating point numbers.
+> [!NOTE]
+> Remember to put quotes around version strings so they are not interpreted as floating point numbers.
 
 ```yaml
 jobs:
@@ -124,11 +113,35 @@ jobs:
           ruff-version: "0.0.257"
 ```
 
+### Command line usage
+
+First install the Flake8 SARIF formatter, if you are using Flake8:
+
+```bash
+python3 -m pip install flake8-sarif-formatter
+```
+
+Then run the linter, which must already be installed in your environment:
+
+```bash
+python3 ./python_lint.py <linter> [<linter> ...] [<options>]
+```
+
+The linter/type checker can be one or more of `flake8`, `pylint`, `ruff`, `mypy`, `pytype`, `pyright`, `fixit`, `pyre`.
+
 ## FAQ
 
-### Why not use the existing Python linting Actions?
+### Why not use existing Python linting Actions?
 
 They don't all produce SARIF, and they don't upload to Code Scanning.
+
+### Why not use MegaLinter or Super-linter?
+
+They aggregate lots of linters, for a lot of languages, but do not focus on producing output in SARIF, nor on Python.
+
+Although MegaLinter has a [SARIF output formatter](https://megalinter.io/latest/reporters/SarifReporter/), only those linters natively able to produce SARIF are usable this way.
+
+This Action is specialised for useful linters for Python, and produces SARIF.
 
 ### Why not create N different Actions?
 
@@ -180,7 +193,8 @@ See [CODEOWNERS](CODEOWNERS) for the list of maintainers.
 
 ## Support
 
-> ℹ️ This is an _unofficial_ tool created by Field Security Services, and is not officially supported by GitHub.
+> [!NOTE]
+> This is an _unofficial_ tool created by Field Security Services, and is not officially supported by GitHub.
 
 See the [SUPPORT](SUPPORT.md) file.
 
