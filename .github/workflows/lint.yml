@@ -39,7 +39,7 @@ jobs:
           # install packages one-by-one so it is clearer which fails, if it does
           python_packages=('flake8' 'pylint' 'ruff' 'mypy' 'pytype' 'pyright' 'fixit' 'pyre-check' 'flake8-sarif-formatter')
           for package in "${python_packages[@]}"; do
-            echo "::notice::Installing Python package ${package}"
+            echo "Installing Python package ${package}"
             if ! python3 -mpip install ${PIP_ARGS} -q "${package}"; then
               echo "::warning::Failed to installed Python dependency ${package}, continuing"
             fi
