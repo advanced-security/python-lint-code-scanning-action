@@ -65,7 +65,8 @@ runs:
       uses: actions/checkout@v4
 
     - name: Set up Python
-      uses: actions/setup-python@v5
+      id: setup-python
+      uses: actions/setup-python@v4
       with:
         python-version: ${{ inputs.python-version }}
 
@@ -131,6 +132,11 @@ runs:
                 LINTER_VERSION_CONSTRAINT="==${INPUTS_PYRE_VERSION}"
               fi
             fi
+          fi
+
+          # deal with HomeBrew managed Python on GitHub Hosted MacOS runners
+          if [[ "${RUNNER_OS}" == "macOS" ]]; then
+            EXTRA_PIP_FLAGS="${EXTRA_PIP_FLAGS} --break-system-packages"
           fi
 
           echo "::debug::Installing ${INPUTS_LINTER}${LINTER_VERSION_CONSTRAINT} for Python ${INPUTS_PYTHON_VERSION}"

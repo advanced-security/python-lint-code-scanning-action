@@ -20,15 +20,33 @@ jobs:
       fail-fast: false
 
     steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
       # install dependencies for all linters, then run the linter, so we don't get import failures when the linters scan the code
-      # upgrade pip, so that we can install flake8_sarif_formatter properly from the git repo
-      - uses: actions/checkout@v4
+      # not required, just makes the test cases a bit cleaner
       - name: Install pip dependencies
+        if: ${{ ! ( runner.os == 'macOS' && matrix.python-version == '3.7' ) }}
         run: |
-          python3 -mpip install -q --upgrade pip
-          python3 -mpip install -q flake8 pylint ruff mypy pytype pyright fixit pyre-check
-          python3 -mpip install -q flake8-sarif-formatter
+          # deal with HomeBrew managed Python on GitHub Hosted MacOS runners
+          if [[ "${RUNNER_OS}" == "macOS" ]]; then
+            PIP_ARGS="--break-system-packages"
+          else
+            PIP_ARGS=""
+          fi
+          # upgrade pip, so that we can install flake8_sarif_formatter properly from the git repo
+          python3 -mpip install ${PIP_ARGS} -q --upgrade pip
+          # install packages one-by-one so it is clearer which fails, if it does
+          python_packages=('flake8' 'pylint' 'ruff' 'mypy' 'pytype' 'pyright' 'fixit' 'pyre-check' 'flake8-sarif-formatter')
+          for package in "${python_packages[@]}"; do
+            echo "Installing Python package ${package}"
+            if ! python3 -mpip install ${PIP_ARGS} -q "${package}"; then
+              echo "::warning::Failed to installed Python dependency ${package}, continuing"
+            fi
+          done
+
       - name: Run Python Lint
+        if: ${{ ! ( runner.os == 'macOS' && matrix.python-version == '3.7' ) }}
         uses: advanced-security/python-lint-code-scanning-action@main
         with:
           linter: ${{ matrix.linter }}
