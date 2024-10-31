@@ -24,6 +24,7 @@ jobs:
         uses: actions/checkout@v4
 
       # install dependencies for all linters, then run the linter, so we don't get import failures when the linters scan the code
+      # not required, just makes the test cases a bit cleaner
       - name: Install pip dependencies
         if: ${{ ! ( runner.os == 'macOS' && matrix.python-version == '3.7' ) }}
         run: |
@@ -39,10 +40,13 @@ jobs:
           python_packages=('flake8' 'pylint' 'ruff' 'mypy' 'pytype' 'pyright' 'fixit' 'pyre-check' 'flake8-sarif-formatter')
           for package in "${python_packages[@]}"; do
             echo "::notice::Installing Python package ${package}"
-            python3 -mpip install ${PIP_ARGS} -q "${package}"
+            if ! python3 -mpip install ${PIP_ARGS} -q "${package}"; then
+              echo "::warning::Failed to installed Python dependency ${package}, continuing"
+            fi
           done
 
       - name: Run Python Lint
+        if: ${{ ! ( runner.os == 'macOS' && matrix.python-version == '3.7' ) }}
         uses: advanced-security/python-lint-code-scanning-action@main
         with:
           linter: ${{ matrix.linter }}
