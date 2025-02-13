@@ -20,7 +20,7 @@ This Action and Python script lets you run one of several Python linters and typ
 
 ## Requirements
 
-- Python 3.8 or higher (3.8 or higher for MacOS on GitHub hosted runners)
+- Python 3.8 or higher
 - For Pytype, Python 3.10 or lower
 - For Fixit, Python 3.8 or higher
 - GitHub Actions

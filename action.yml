@@ -21,7 +21,7 @@ inputs:
     description: 'The version of python to use'
     required: false
     default: '3.10'
-    choices: ['3.12', '3.11', '3.10', '3.9', '3.8', '3.7']
+    choices: ['3.12', '3.11', '3.10', '3.9', '3.8']
   ruff-version:
     description: 'The version of ruff to use'
     required: false
