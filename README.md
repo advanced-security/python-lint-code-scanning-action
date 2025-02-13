@@ -20,7 +20,7 @@ This Action and Python script lets you run one of several Python linters and typ
 
 ## Requirements
 
-- Python 3.7 or higher (3.8 or higher for MacOS on GitHub hosted runners)
+- Python 3.8 or higher
 - For Pytype, Python 3.10 or lower
 - For Fixit, Python 3.8 or higher
 - GitHub Actions
@@ -74,7 +74,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [3.7, 3.8, 3.9, 3.10, 3.11]
+        python-version: [3.8, 3.9, 3.10, 3.11, 3.12]
     steps:
       - uses: advanced-security/python-lint-code-scanning-action@v1
         with:
@@ -91,7 +91,7 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      - run: python3 -mpip install flake8-bugbear
+      - run: python3 -m pip install flake8-bugbear
       - uses: advanced-security/python-lint-code-scanning-action@v1
         with:
           linter: flake8
@@ -110,7 +110,7 @@ jobs:
       - uses: advanced-security/python-lint-code-scanning-action@v1
         with:
           linter: ruff
-          ruff-version: "0.0.257"
+          ruff-version: "0.7.2"
 ```
 
 ### Command line usage
