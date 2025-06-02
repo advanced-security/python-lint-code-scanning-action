@@ -771,7 +771,7 @@ def main() -> None:
 
     if any({linter not in LINTERS for linter in args.linter}):
         sanitized_linter = [linter.replace('\n', '').replace('\r', '') for linter in args.linter]
-        LOG.error("Invalid linter choice: %s", sanitized_linter)
+        LOG.error("Invalid linter choice: %s", ', '.join(sanitized_linter))
         sys.exit(1)
 
     sarif_runs: List[dict] = []
