@@ -11,6 +11,8 @@ jobs:
         python-version: ['3.10']
         os: [windows-latest] # this will fail on Windows currently
       fail-fast: false
+    permissions:
+      security-events: write
 
     steps:
       # install dependencies for all linters, then run the linter, so we don't get import failures when the linters scan the code
