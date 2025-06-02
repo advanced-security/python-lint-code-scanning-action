@@ -770,7 +770,8 @@ def main() -> None:
     logging.basicConfig(level=logging.DEBUG if args.debug else logging.INFO)
 
     if any({linter not in LINTERS for linter in args.linter}):
-        LOG.error("Invalid linter choice: %s", args.linter)
+        sanitized_linter = [re.sub(r'[\x00-\x1F]', '', linter) for linter in args.linter]
+        LOG.error("Invalid linter choice: %s", ', '.join(sanitized_linter))
         sys.exit(1)
 
     sarif_runs: List[dict] = []
