@@ -15,7 +15,7 @@ jobs:
     strategy:
       matrix:
         linter: ['flake8', 'pylint', 'ruff', 'mypy', 'pytype', 'pyright', 'fixit', 'pyre']
-        python-version: ['3.7', '3.8', '3.9', '3.10', '3.11', '3.12']
+        python-version: ['3.8', '3.9', '3.10', '3.11', '3.12', '3.13']
         os: [ubuntu-latest, macos-latest] # doesn't yet work on Windows
       fail-fast: false
     permissions:
@@ -23,7 +23,7 @@ jobs:
 
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       # install dependencies for all linters, then run the linter, so we don't get import failures when the linters scan the code
       # not required, just makes the test cases a bit cleaner
